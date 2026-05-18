@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "chat-bubble": "../../components/chat-bubble/chat-bubble",
+    "meal-card": "../../components/meal-card/meal-card",
+    "workout-card": "../../components/workout-card/workout-card",
+    "metrics-card": "../../components/metrics-card/metrics-card"
+  },
+  "navigationBarTitleText": "AI营养管家"
+}

@@ -1,0 +1,73 @@
+<!-- 训练计划 -->
+<scroll-view class="plan-page" scroll-y enhanced show-scrollbar="{{false}}">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view class="empty-box" wx:if="{{!loading && !plan}}">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">暂无训练计划</text>
+    <text class="empty-hint">去「AI教练」录入身体数据后，计划会自动生成</text>
+  </view>
+
+  <view wx:if="{{plan}}">
+    <view class="plan-header">
+      <text class="plan-title">训练计划</text>
+      <text class="plan-week">{{plan.weekLabel || '7天计划'}}</text>
+    </view>
+
+    <view class="day-card" wx:for="{{plan.days}}" wx:key="day" wx:for-item="d" wx:for-index="di">
+      <!-- 休息日 -->
+      <view wx:if="{{d.rest}}" class="rest-day">
+        <text class="rest-label">{{d.label}} · {{d.dateStr}}</text>
+        <text class="rest-text">休息日 💤</text>
+      </view>
+
+      <!-- 训练日 -->
+      <view wx:else>
+        <view class="day-header">
+          <view class="day-left">
+            <text class="day-label">{{d.label}}</text>
+            <text class="day-date">{{d.dateStr}}</text>
+          </view>
+          <text class="day-focus">{{d.focus}}</text>
+        </view>
+
+        <view class="exercise-list">
+          <view class="ex-item {{ex.completed ? 'done' : ''}}" wx:for="{{d.exercises}}" wx:for-item="ex" wx:for-index="ei" wx:key="_key">
+            <view class="ex-top">
+              <view class="ex-check" data-dayidx="{{di}}" data-exidx="{{ei}}" bind:tap="onToggleComplete">
+                <view class="check-box {{ex.completed ? 'checked' : ''}}">
+                  <text wx:if="{{ex.completed}}">✓</text>
+                </view>
+                <text class="ex-name {{ex.completed ? 'strike' : ''}}">{{ex.name}}</text>
+              </view>
+              <view class="diff-btns">
+                <view class="diff-btn {{ex.difficulty === 'easy' ? 'active easy' : ''}}" data-day="{{di}}" data-exidx="{{ei}}" data-level="easy" bind:tap="onSetDifficulty">简单</view>
+                <view class="diff-btn {{ex.difficulty === 'medium' ? 'active medium' : ''}}" data-day="{{di}}" data-exidx="{{ei}}" data-level="medium" bind:tap="onSetDifficulty">适中</view>
+                <view class="diff-btn {{ex.difficulty === 'hard' ? 'active hard' : ''}}" data-day="{{di}}" data-exidx="{{ei}}" data-level="hard" bind:tap="onSetDifficulty">困难</view>
+              </view>
+            </view>
+            <view class="ex-params">
+              <view class="param" data-day="{{di}}" data-exidx="{{ei}}" data-field="sets" bind:tap="onEditParam">
+                <text class="param-val">{{ex.sets}}</text>
+                <text class="param-label">组</text>
+              </view>
+              <view class="param" data-day="{{di}}" data-exidx="{{ei}}" data-field="reps" bind:tap="onEditParam">
+                <text class="param-val">{{ex.reps}}</text>
+                <text class="param-label">次</text>
+              </view>
+              <view class="param" data-day="{{di}}" data-exidx="{{ei}}" data-field="weight" bind:tap="onEditParam">
+                <text class="param-val">{{ex.weight || 0}}</text>
+                <text class="param-label">kg</text>
+              </view>
+            </view>
+            <text class="ex-note">💡 {{ex.notes}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="bottom-space"></view>
+  </view>
+</scroll-view>

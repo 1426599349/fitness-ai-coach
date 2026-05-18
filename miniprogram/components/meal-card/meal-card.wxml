@@ -1,0 +1,42 @@
+<!--
+  饮食搭配卡片
+-->
+<view class="meal-card">
+  <view class="card-header">
+    <text class="card-icon">🍽️</text>
+    <text class="card-title">今日饮食搭配</text>
+    <view class="regenerate-btn" bind:tap="onRegenerate">
+      <text>🔄 换一换</text>
+    </view>
+  </view>
+
+  <!-- 主食 -->
+  <view class="staple-section">
+    <view class="staple-tag">主食</view>
+    <text class="staple-name">{{data.main_staple}}</text>
+  </view>
+
+  <!-- 菜品列表 -->
+  <view class="dishes-list">
+    <view class="dish-item" wx:for="{{data.dishes}}" wx:key="name">
+      <view class="dish-info">
+        <text class="dish-name">{{item.name}}</text>
+        <text class="dish-grams">{{item.grams}}g</text>
+      </view>
+      <text class="dish-kcal">{{item.kcal}} kcal</text>
+    </view>
+  </view>
+
+  <!-- 营养总结 -->
+  <view class="nutrition-summary">
+    <view class="total-kcal">
+      <text class="kcal-number">{{data.total_kcal}}</text>
+      <text class="kcal-unit">kcal</text>
+    </view>
+    <view class="macro-tags">
+      <text class="macro-tag protein">蛋白质 {{data.protein_g}}g</text>
+      <text class="macro-tag fat">脂肪 {{data.fat_g}}g</text>
+      <text class="macro-tag carb">碳水 {{data.carb_g}}g</text>
+    </view>
+  </view>
+</view>

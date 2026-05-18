@@ -1,0 +1,29 @@
+<view class="detail-page" wx:if="{{ex}}">
+  <!-- 动作图片 -->
+  <view class="img-area">
+    <image wx:if="{{ex.image}}" class="ex-img" src="{{ex.image}}" mode="aspectFit" bind:tap="onPreviewImage" />
+    <view wx:else class="ex-placeholder" style="background: linear-gradient(135deg, {{ex.color}}22, {{ex.color}}44);">
+      <text class="ph-emoji">{{ex.emoji}}</text>
+      <text class="ph-name">{{ex.name}}</text>
+      <text class="ph-muscle">{{ex.muscle}} · {{ex.place === 'gym' ? '健身房' : '居家'}}</text>
+    </view>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="info-card">
+    <view class="info-row">
+      <text class="ex-title">{{ex.name}}</text>
+    </view>
+    <view class="tag-row">
+      <view class="tag" style="background: {{ex.color || '#888'}}">{{ex.muscle}}</view>
+      <view class="tag level">{{ex.level}}</view>
+      <view class="tag place">{{ex.place === 'gym' ? '🏋️ 健身房' : '🏠 居家'}}</view>
+    </view>
+  </view>
+
+  <!-- 动作要领 -->
+  <view class="tips-card">
+    <view class="section-title">动作要领</view>
+    <view class="detail-text">{{ex.desc}}</view>
+  </view>
+</view>

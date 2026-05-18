@@ -1,0 +1,14 @@
+<!-- 纯装饰指针转盘 -->
+<view class="wheel-overlay" wx:if="{{visible}}" catchtouchmove="preventScroll">
+  <view class="wheel-container">
+    <text class="wheel-title">🎰 为你搭配今日三餐...</text>
+
+    <view class="wheel-box">
+      <view class="pointer"></view>
+      <canvas type="2d" id="wheelCanvas" class="wheel-canvas"></canvas>
+      <view class="wheel-center">
+        <view class="center-dot"></view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "name": "workoutPlan",
+  "version": "1.0.0",
+  "description": "健身方案生成与查询",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

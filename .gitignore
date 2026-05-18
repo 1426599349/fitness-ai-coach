@@ -1,0 +1,25 @@
+# 依赖
+node_modules/
+
+# 云函数（部署到微信云，不用提交 node_modules）
+miniprogram/cloudfunctions/*/node_modules/
+
+# 敏感信息
+*.key
+*.pem
+.env
+
+# 临时/生成文件
+*.pyc
+__pycache__/
+exercise_images/
+
+# 小程序编译产物
+miniprogram/.wxapp/
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store

@@ -1,0 +1,131 @@
+<scroll-view class="profile-page" scroll-y enhanced show-scrollbar="{{false}}">
+  <!-- 用户头部 -->
+  <view class="profile-header">
+    <view class="avatar-large">
+      <text class="avatar-emoji">🏋️</text>
+    </view>
+    <view class="user-info">
+      <text class="user-name" wx:if="{{profile}}">健身爱好者</text>
+      <text class="user-name" wx:else>未设置档案</text>
+      <text class="user-desc" wx:if="{{profile}}">
+        点击下方数据项可编辑
+      </text>
+    </view>
+  </view>
+
+  <!-- 身体数据（可点击编辑） -->
+  <view class="section" wx:if="{{profile}}">
+    <view class="section-title">身体数据（点击编辑）</view>
+    <view class="data-grid">
+      <view class="data-item editable" bind:tap="onEditField" data-field="height_cm" data-label="身高">
+        <text class="data-value">{{profile.height_cm}}</text>
+        <text class="data-label">身高 (cm) ›</text>
+      </view>
+      <view class="data-item editable" bind:tap="onEditField" data-field="weight_kg" data-label="体重">
+        <text class="data-value">{{profile.weight_kg}}</text>
+        <text class="data-label">体重 (kg) ›</text>
+      </view>
+      <view class="data-item editable" bind:tap="onEditField" data-field="age" data-label="年龄">
+        <text class="data-value">{{profile.age}}</text>
+        <text class="data-label">年龄 ›</text>
+      </view>
+      <view class="data-item editable" bind:tap="onEditGender">
+        <text class="data-value">{{profile.gender === 'male' ? '♂' : '♀'}}</text>
+        <text class="data-label">性别 ›</text>
+      </view>
+      <view class="data-item editable" bind:tap="onEditGoal">
+        <text class="data-value">{{goalLabel}}</text>
+        <text class="data-label">目标 ›</text>
+      </view>
+      <view class="data-item editable" bind:tap="onEditPlace">
+        <text class="data-value">{{profile.place === 'gym' ? '🏋️' : '🏠'}}</text>
+        <text class="data-label">{{profile.place === 'gym' ? '健身房' : '居家'}} ›</text>
+      </view>
+    </view>
+
+    <!-- 计算结果 -->
+    <view class="metrics-row" wx:if="{{metrics}}">
+      <view class="metric-chip">
+        <text class="m-val">BMI {{metrics.bmi}}</text>
+      </view>
+      <view class="metric-chip">
+        <text class="m-val">每日 {{metrics.recommended_intake}} kcal</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 体重历史 -->
+  <view class="section" wx:if="{{weightHistory.length > 0}}">
+    <view class="section-title">体重记录 (近7次)</view>
+    <view class="weight-list">
+      <view class="weight-item" wx:for="{{weightHistory}}" wx:key="date">
+        <text class="weight-date">{{item.date}}</text>
+        <text class="weight-value">{{item.weight_kg}} kg</text>
+        <text class="weight-change {{item.changeDir}}" wx:if="{{item.changeText}}">
+          {{item.changeDir === 'up' ? '↑' : '↓'}} {{item.changeText}}
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 饮食偏好 -->
+  <view class="section">
+    <view class="section-title">饮食偏好</view>
+    <view class="allergy-tags" wx:if="{{profile && profile.allergies.length > 0}}">
+      <view class="allergy-tag" wx:for="{{profile.allergies}}" wx:key="*this">
+        🚫 {{item}}
+      </view>
+    </view>
+    <view class="empty-hint" wx:else>
+      未设置忌口，点击下方按钮添加
+    </view>
+    <view class="action-row">
+      <button class="edit-btn" bind:tap="onEditAllergies" size="mini">编辑忌口</button>
+    </view>
+  </view>
+
+  <!-- 喜欢食材 -->
+  <view class="section">
+    <view class="section-title">喜欢食材</view>
+    <view class="like-tags" wx:if="{{profile && profile.likedFoods && profile.likedFoods.length > 0}}">
+      <view class="like-tag" wx:for="{{profile.likedFoods}}" wx:key="*this">
+        ❤️ {{item}}
+      </view>
+    </view>
+    <view class="empty-hint" wx:else>
+      未设置喜欢食材，AI会随机推荐
+    </view>
+    <view class="action-row">
+      <button class="edit-btn like" bind:tap="onEditLikedFoods" size="mini">编辑喜欢食材</button>
+    </view>
+  </view>
+
+  <!-- 功能 -->
+  <view class="section">
+    <view class="section-title">功能</view>
+    <view class="settings-list">
+      <view class="setting-item" bind:tap="onGoWeeklyPlan">
+        <text>📋 本周训练计划</text>
+        <text class="arrow">›</text>
+      </view>
+      <view class="setting-item" bind:tap="onFeedback">
+        <text>💬 意见反馈</text>
+        <text class="arrow">›</text>
+      </view>
+      <view class="setting-item" bind:tap="onGoPrivacy">
+        <text>📜 隐私政策</text>
+        <text class="arrow">›</text>
+      </view>
+      <view class="setting-item" bind:tap="onClearHistory">
+        <text>清除对话记录</text>
+        <text class="arrow">›</text>
+      </view>
+      <view class="setting-item">
+        <text>关于我们</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-space"></view>
+</scroll-view>

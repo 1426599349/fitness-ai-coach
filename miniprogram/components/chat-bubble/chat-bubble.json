@@ -1,0 +1,8 @@
+{
+  "component": true,
+  "usingComponents": {
+    "meal-card": "../meal-card/meal-card",
+    "workout-card": "../workout-card/workout-card",
+    "metrics-card": "../metrics-card/metrics-card"
+  }
+}

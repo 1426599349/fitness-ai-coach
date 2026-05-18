@@ -1,0 +1,80 @@
+.plan-page { min-height: 100vh; background: var(--color-bg); padding: 24rpx; }
+
+.loading-box { display: flex; justify-content: center; padding: 100rpx; }
+.loading-text { font-size: 28rpx; color: var(--color-text-secondary); }
+
+.empty-box { display: flex; flex-direction: column; align-items: center; padding: 120rpx 40rpx; gap: 20rpx; }
+.empty-icon { font-size: 80rpx; }
+.empty-text { font-size: 28rpx; color: var(--color-text-secondary); }
+.empty-hint { font-size: 24rpx; color: var(--color-text-secondary); text-align: center; }
+.gen-btn {
+  margin-top: 30rpx; width: 400rpx; height: 80rpx; line-height: 80rpx;
+  background: var(--color-primary); color: #fff; border-radius: 40rpx;
+  font-size: 28rpx; border: none;
+}
+.gen-btn::after { border: none; }
+
+/* 头部 */
+.plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; padding: 0 10rpx; }
+.plan-title { font-size: 36rpx; font-weight: 700; }
+.plan-week { font-size: 26rpx; color: var(--color-text-secondary); }
+
+/* 日卡片 */
+.day-card { margin-bottom: 20rpx; }
+.rest-day {
+  background: var(--color-surface); border-radius: 16rpx; padding: 30rpx;
+  display: flex; align-items: center; gap: 16rpx;
+}
+.rest-label { font-size: 28rpx; font-weight: 600; }
+.rest-text { font-size: 26rpx; color: var(--color-text-secondary); }
+
+.day-header {
+  background: var(--color-primary); border-radius: 16rpx 16rpx 0 0;
+  padding: 20rpx 24rpx; display: flex; justify-content: space-between;
+}
+.day-left { display: flex; align-items: baseline; gap: 12rpx; }
+.day-label { font-size: 28rpx; font-weight: 700; color: #fff; }
+.day-date { font-size: 22rpx; color: rgba(255,255,255,0.7); }
+.day-focus { font-size: 26rpx; color: rgba(255,255,255,0.8); }
+
+.exercise-list { background: var(--color-surface); border-radius: 0 0 16rpx 16rpx; overflow: hidden; }
+.ex-item {
+  padding: 24rpx; border-bottom: 1rpx solid rgba(0,0,0,0.06);
+  transition: all 0.2s;
+}
+.ex-item:last-child { border-bottom: none; }
+.ex-item.done { opacity: 0.55; }
+
+.ex-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.ex-check { display: flex; align-items: center; gap: 14rpx; }
+.check-box {
+  width: 40rpx; height: 40rpx; border-radius: 50%;
+  border: 2rpx solid #ccc; display: flex; align-items: center; justify-content: center;
+  font-size: 22rpx; color: transparent; transition: all 0.15s;
+  flex-shrink: 0;
+}
+.check-box.checked { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.ex-name { font-size: 30rpx; font-weight: 600; }
+.ex-name.strike { text-decoration: line-through; color: #999; }
+
+.diff-btns { display: flex; gap: 8rpx; }
+.diff-btn {
+  font-size: 20rpx; padding: 4rpx 12rpx; border-radius: 12rpx;
+  background: var(--color-surface-light); color: var(--color-text-secondary);
+}
+.diff-btn.active.easy { background: #2ecc71; color: #fff; }
+.diff-btn.active.medium { background: #f39c12; color: #fff; }
+.diff-btn.active.hard { background: #e74c3c; color: #fff; }
+
+.ex-params { display: flex; gap: 20rpx; margin-bottom: 12rpx; }
+.param {
+  display: flex; align-items: baseline; gap: 4rpx;
+  padding: 8rpx 16rpx; background: var(--color-surface-light);
+  border-radius: 10rpx;
+}
+.param-val { font-size: 28rpx; font-weight: 700; color: var(--color-primary); }
+.param-label { font-size: 22rpx; color: var(--color-text-secondary); }
+
+.ex-note { font-size: 24rpx; color: var(--color-text-secondary); display: block; }
+
+.bottom-space { height: 60rpx; }

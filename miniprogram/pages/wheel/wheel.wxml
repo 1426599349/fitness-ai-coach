@@ -1,0 +1,80 @@
+<!-- 食物推荐页面 -->
+<view class="wheel-page">
+  <!-- 今日状态 -->
+  <view class="today-status">
+    <text class="status-icon">{{todayUsed ? '✅' : '🎰'}}</text>
+    <text class="status-text">{{todayUsed ? '今日已推荐' : '点击下方按钮获取今日三餐'}}</text>
+  </view>
+
+  <!-- 今日三餐结果卡片 -->
+  <view class="today-meals" wx:if="{{mealDetail0}}">
+    <view class="meal-detail-card">
+      <view class="card-meal-header">
+        <text class="card-emoji">🌅</text>
+        <text class="card-meal-label">早餐</text>
+      </view>
+      <text class="card-staple">{{mealDetail0.main_staple}}</text>
+      <view class="card-dishes">
+        <view class="card-dish" wx:for="{{mealDetail0.dishes}}" wx:key="name">
+          <text class="dish-name">{{item.name}} {{item.grams}}g</text>
+          <text class="dish-nutrition">{{item.kcal}}kcal | 蛋白{{item.protein_g}}g 脂肪{{item.fat_g}}g 碳水{{item.carb_g}}g</text>
+        </view>
+      </view>
+      <view class="card-summary">
+        <text class="summary-kcal">{{mealDetail0.total_kcal}} kcal</text>
+        <text class="summary-macro">蛋白{{mealDetail0.protein_g}}g · 脂肪{{mealDetail0.fat_g}}g · 碳水{{mealDetail0.carb_g}}g</text>
+      </view>
+    </view>
+
+    <view class="meal-detail-card">
+      <view class="card-meal-header">
+        <text class="card-emoji">☀️</text>
+        <text class="card-meal-label">午餐</text>
+      </view>
+      <text class="card-staple">{{mealDetail1.main_staple}}</text>
+      <view class="card-dishes">
+        <view class="card-dish" wx:for="{{mealDetail1.dishes}}" wx:key="name">
+          <text class="dish-name">{{item.name}} {{item.grams}}g</text>
+          <text class="dish-nutrition">{{item.kcal}}kcal | 蛋白{{item.protein_g}}g 脂肪{{item.fat_g}}g 碳水{{item.carb_g}}g</text>
+        </view>
+      </view>
+      <view class="card-summary">
+        <text class="summary-kcal">{{mealDetail1.total_kcal}} kcal</text>
+        <text class="summary-macro">蛋白{{mealDetail1.protein_g}}g · 脂肪{{mealDetail1.fat_g}}g · 碳水{{mealDetail1.carb_g}}g</text>
+      </view>
+    </view>
+
+    <view class="meal-detail-card">
+      <view class="card-meal-header">
+        <text class="card-emoji">🌙</text>
+        <text class="card-meal-label">晚餐</text>
+      </view>
+      <text class="card-staple">{{mealDetail2.main_staple}}</text>
+      <view class="card-dishes">
+        <view class="card-dish" wx:for="{{mealDetail2.dishes}}" wx:key="name">
+          <text class="dish-name">{{item.name}} {{item.grams}}g</text>
+          <text class="dish-nutrition">{{item.kcal}}kcal | 蛋白{{item.protein_g}}g 脂肪{{item.fat_g}}g 碳水{{item.carb_g}}g</text>
+        </view>
+      </view>
+      <view class="card-summary">
+        <text class="summary-kcal">{{mealDetail2.total_kcal}} kcal</text>
+        <text class="summary-macro">蛋白{{mealDetail2.protein_g}}g · 脂肪{{mealDetail2.fat_g}}g · 碳水{{mealDetail2.carb_g}}g</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作区 -->
+  <view class="wheel-action-area">
+    <button class="big-spin-btn" bind:tap="onStart" wx:if="{{!todayUsed}}">
+      🎰 开始转动
+    </button>
+    <view wx:if="{{todayUsed}}" class="retry-area">
+      <button class="retry-spin-btn" bind:tap="onStart" data-retry="{{true}}">
+        🔄 不满意？重新转（-10积分）
+      </button>
+    </view>
+    <text class="hint" wx:if="{{!todayUsed}}">每天首次免费，AI 智能搭配三餐</text>
+  </view>
+</view>
+
+<meal-wheel visible="{{showWheel}}" bind:done="onWheelDone" />

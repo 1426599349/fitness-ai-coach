@@ -1,0 +1,9 @@
+{
+  "name": "weeklyCheckin",
+  "version": "1.0.0",
+  "description": "每周体重回访",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

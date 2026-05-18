@@ -1,0 +1,192 @@
+/**
+ * AI对话首页样式 — 暗黑运动主题
+ */
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-bg);
+}
+
+/* ========== 积分栏 ========== */
+.credits-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 28rpx;
+  background: linear-gradient(135deg, rgba(0,212,170,0.12), rgba(108,92,231,0.12));
+  border-bottom: 1rpx solid rgba(0,0,0,0.05);
+  backdrop-filter: blur(10px);
+}
+.credits-left {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+.credits-icon { font-size: 28rpx; }
+.credits-num { font-size: 30rpx; font-weight: 700; color: var(--color-primary); }
+.credits-label { font-size: 22rpx; color: var(--color-text-secondary); }
+.credits-right {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 22rpx;
+  background: rgba(0,0,0,0.08);
+  border-radius: 30rpx;
+  border: 1rpx solid rgba(0,0,0,0.1);
+}
+.credits-right:active { background: rgba(0,212,170,0.15); }
+.signin-icon { font-size: 24rpx; }
+.signin-text { font-size: 24rpx; color: var(--color-text-secondary); }
+.signin-btn { background: rgba(255,193,7,0.12) !important; border-color: rgba(255,193,7,0.3) !important; }
+
+/* ========== 对话列表 ========== */
+.chat-list {
+  flex: 1;
+  padding: 20rpx 24rpx;
+  overflow-y: auto;
+}
+
+.load-more {
+  display: flex;
+  justify-content: center;
+  padding: 20rpx;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 12rpx;
+}
+.loading-dots .dot {
+  width: 12rpx; height: 12rpx;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.loading-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.msg-wrapper {
+  margin-bottom: 24rpx;
+}
+
+/* ========== AI正在输入动画 ========== */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 20rpx 30rpx;
+  margin-left: 20rpx;
+  background: var(--color-surface);
+  border-radius: 20rpx 20rpx 20rpx 4rpx;
+  width: fit-content;
+}
+.typing-dot {
+  width: 14rpx; height: 14rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: typing 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-10rpx); opacity: 1; }
+}
+
+/* ========== 快捷操作栏 ========== */
+.quick-actions {
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx 24rpx;
+  background: var(--color-surface);
+  border-top: 1rpx solid rgba(0,0,0,0.05);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  padding: 16rpx 20rpx;
+  background: var(--color-surface-light);
+  border-radius: 16rpx;
+  border: 1rpx solid rgba(0,0,0,0.06);
+  min-width: 120rpx;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.quick-action-btn:active {
+  background: rgba(0, 212, 170, 0.15);
+  border-color: var(--color-primary);
+}
+
+.action-icon {
+  font-size: 32rpx;
+}
+.action-label {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+/* ========== 输入区域 ========== */
+.input-area {
+  padding: 16rpx 20rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: var(--color-surface);
+  border-top: 1rpx solid rgba(0,0,0,0.05);
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-light);
+  border-radius: 40rpx;
+  padding: 8rpx 8rpx 8rpx 28rpx;
+  border: 1rpx solid rgba(0,0,0,0.08);
+  transition: border-color 0.2s;
+}
+.input-wrapper:focus-within {
+  border-color: var(--color-primary);
+}
+
+.chat-input {
+  flex: 1;
+  height: 72rpx;
+  font-size: 28rpx;
+  color: var(--color-text);
+  background: transparent;
+}
+
+.input-placeholder {
+  color: var(--color-text-secondary);
+  font-size: 26rpx;
+}
+
+.send-btn {
+  width: 64rpx; height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.08);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.send-btn.active {
+  background: var(--color-primary);
+}
+.send-icon {
+  font-size: 28rpx;
+  color: #fff;
+  transform: rotate(-45deg);
+}

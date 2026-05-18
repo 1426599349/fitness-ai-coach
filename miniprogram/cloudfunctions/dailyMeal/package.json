@@ -1,0 +1,9 @@
+{
+  "name": "dailyMeal",
+  "version": "1.0.0",
+  "description": "每日饮食生成",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

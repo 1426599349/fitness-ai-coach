@@ -1,0 +1,24 @@
+<view class="lib-page">
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索动作..." bind:input="onSearch" />
+    <view class="place-btn {{place === 'all' ? '' : 'active'}}" bind:tap="onPlaceToggle">
+      {{place === 'all' ? '全部' : place === 'home' ? '🏠 居家' : '🏋️ 健身房'}}
+    </view>
+  </view>
+
+  <scroll-view class="filter-bar" scroll-x enhanced show-scrollbar="{{false}}">
+    <view wx:for="{{groups}}" wx:key="*this"
+      class="filter-tag {{filter === item || (filter === 'all' && item === '全部') ? 'active' : ''}}"
+      data-filter="{{item}}" bind:tap="onFilter">{{item}}</view>
+  </scroll-view>
+
+  <scroll-view class="ex-list" scroll-y enhanced show-scrollbar="{{false}}">
+    <view wx:if="{{exercises.length === 0}}" class="empty">未找到匹配动作</view>
+    <view wx:for="{{exercises}}" wx:key="name" class="ex-row" data-index="{{index}}" bind:tap="onCardTap">
+      <view class="ex-muscle-tag" style="background: {{item.color}}">{{item.muscle}}</view>
+      <text class="ex-name">{{item.name}}</text>
+      <text class="ex-arrow">›</text>
+    </view>
+    <view style="height: 40rpx;"></view>
+  </scroll-view>
+</view>

@@ -1,0 +1,56 @@
+<!--
+  身体指标卡片 — BMI / BMR / TDEE / 推荐摄入
+-->
+<view class="metrics-card">
+  <view class="card-header">
+    <text class="card-icon">📊</text>
+    <text class="card-title">身体指标测算</text>
+  </view>
+
+  <!-- 主指标: BMI -->
+  <view class="bmi-section">
+    <view class="bmi-ring">
+      <view class="bmi-value">{{data.bmi}}</view>
+      <view class="bmi-label">BMI</view>
+    </view>
+    <view class="bmi-level" style="color: {{bmiColor}}">{{bmiLevel}}</view>
+  </view>
+
+  <!-- 热量指标 -->
+  <view class="metrics-grid">
+    <view class="metric-item">
+      <view class="metric-value">{{data.bmr}}</view>
+      <view class="metric-label">基础代谢 (kcal)</view>
+    </view>
+    <view class="metric-item">
+      <view class="metric-value">{{data.tdee}}</view>
+      <view class="metric-label">总消耗 (kcal)</view>
+    </view>
+    <view class="metric-item highlight">
+      <view class="metric-value">{{data.recommended_intake}}</view>
+      <view class="metric-label">推荐摄入 (kcal)</view>
+    </view>
+  </view>
+
+  <!-- 宏量营养素 -->
+  <view class="macros-section">
+    <view class="macro-item">
+      <view class="macro-bar">
+        <view class="macro-fill protein" style="width: {{proteinPercent}}%"></view>
+      </view>
+      <text class="macro-text">蛋白质 {{data.protein_g}}g</text>
+    </view>
+    <view class="macro-item">
+      <view class="macro-bar">
+        <view class="macro-fill fat" style="width: {{fatPercent}}%"></view>
+      </view>
+      <text class="macro-text">脂肪 {{data.fat_g}}g</text>
+    </view>
+    <view class="macro-item">
+      <view class="macro-bar">
+        <view class="macro-fill carb" style="width: {{carbPercent}}%"></view>
+      </view>
+      <text class="macro-text">碳水 {{data.carb_g}}g</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,107 @@
+<!--
+  聊天气泡组件 — 支持文本/卡片/引导四种模式
+-->
+<view class="bubble-container {{message.role}}">
+  <!-- AI头像 -->
+  <view class="avatar" wx:if="{{message.role === 'ai'}}">
+    <text class="avatar-emoji">🤖</text>
+  </view>
+
+  <!-- 消息体 -->
+  <view class="bubble-body {{message.role}}">
+    <!-- 纯文本 -->
+    <view wx:if="{{message.type === 'text'}}" class="text-bubble {{message.role}}">
+      <text class="text-content" user-select>{{message.content}}</text>
+    </view>
+
+    <!-- 场所选择按钮 -->
+    <view wx:if="{{message.type === 'place_choice'}}" class="text-bubble ai">
+      <text class="text-content">{{message.content}}</text>
+      <view class="place-btns">
+        <view class="place-btn home" bind:tap="onChoosePlace" data-place="home">
+          <text class="place-icon">🏠</text>
+          <text class="place-label">居家健身</text>
+        </view>
+        <view class="place-btn gym" bind:tap="onChoosePlace" data-place="gym">
+          <text class="place-icon">🏋️</text>
+          <text class="place-label">健身房</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 身体数据录入表单 -->
+    <view wx:if="{{message.type === 'onboarding_form'}}" class="form-bubble ai">
+      <text class="form-title">📋 请填写你的身体数据</text>
+      <view class="form-row">
+        <text class="form-label">身高</text>
+        <picker mode="selector" range="{{formHeights}}" value="{{formHeightIdx}}" bind:change="onFormHeight">
+          <view class="form-picker">{{formHeights[formHeightIdx]}} cm</view>
+        </picker>
+      </view>
+      <view class="form-row">
+        <text class="form-label">体重</text>
+        <picker mode="selector" range="{{formWeights}}" value="{{formWeightIdx}}" bind:change="onFormWeight">
+          <view class="form-picker">{{formWeights[formWeightIdx]}} kg</view>
+        </picker>
+      </view>
+      <view class="form-row">
+        <text class="form-label">性别</text>
+        <view class="form-seg">
+          <view class="seg-btn {{formGender === 'male' ? 'active' : ''}}" bind:tap="onFormGender" data-g="male">男</view>
+          <view class="seg-btn {{formGender === 'female' ? 'active' : ''}}" bind:tap="onFormGender" data-g="female">女</view>
+        </view>
+      </view>
+      <view class="form-row">
+        <text class="form-label">年龄</text>
+        <picker mode="selector" range="{{formAges}}" value="{{formAgeIdx}}" bind:change="onFormAge">
+          <view class="form-picker">{{formAges[formAgeIdx]}} 岁</view>
+        </picker>
+      </view>
+      <view class="form-row">
+        <text class="form-label">目标</text>
+        <view class="form-seg small">
+          <view class="seg-btn {{formGoal === 'fat_loss' ? 'active' : ''}}" bind:tap="onFormGoal" data-g="fat_loss">减脂</view>
+          <view class="seg-btn {{formGoal === 'muscle_gain' ? 'active' : ''}}" bind:tap="onFormGoal" data-g="muscle_gain">增肌</view>
+          <view class="seg-btn {{formGoal === 'shape' ? 'active' : ''}}" bind:tap="onFormGoal" data-g="shape">塑形</view>
+          <view class="seg-btn {{formGoal === 'maintain' ? 'active' : ''}}" bind:tap="onFormGoal" data-g="maintain">维持</view>
+        </view>
+      </view>
+      <view class="form-row">
+        <text class="form-label">场所</text>
+        <view class="form-seg">
+          <view class="seg-btn {{formPlace === 'home' ? 'active' : ''}}" bind:tap="onFormPlace" data-p="home">🏠 居家</view>
+          <view class="seg-btn {{formPlace === 'gym' ? 'active' : ''}}" bind:tap="onFormPlace" data-p="gym">🏋️ 健身房</view>
+        </view>
+      </view>
+      <view class="form-submit" bind:tap="onFormSubmit">确认提交 ✓</view>
+    </view>
+
+    <!-- 身体指标卡片 -->
+    <metrics-card
+      wx:if="{{message.type === 'metrics-card'}}"
+      data="{{message.cardData}}"
+    />
+
+    <!-- 训练计划卡片 -->
+    <workout-card
+      wx:if="{{message.type === 'workout-card'}}"
+      data="{{message.cardData}}"
+      bind:action="onWorkoutAction"
+    />
+
+    <!-- 饮食搭配卡片 -->
+    <meal-card
+      wx:if="{{message.type === 'meal-card'}}"
+      data="{{message.cardData}}"
+      bind:regenerate="onRegenerateMeal"
+    />
+
+    <!-- 时间戳 -->
+    <view class="msg-time">{{message.time}}</view>
+  </view>
+
+  <!-- 用户头像 -->
+  <view class="avatar" wx:if="{{message.role === 'user'}}">
+    <view class="avatar-user">我</view>
+  </view>
+</view>

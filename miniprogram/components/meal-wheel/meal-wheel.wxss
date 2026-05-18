@@ -1,0 +1,39 @@
+.wheel-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+}
+.wheel-container {
+  display: flex; flex-direction: column; align-items: center; gap: 30rpx;
+}
+.wheel-title { font-size: 34rpx; font-weight: 700; }
+
+.wheel-box {
+  position: relative;
+  width: 480rpx; height: 480rpx;
+}
+.pointer {
+  position: absolute; top: -16rpx; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 18rpx solid transparent;
+  border-right: 18rpx solid transparent;
+  border-top: 36rpx solid #e74c3c;
+  z-index: 10;
+  filter: drop-shadow(0 2rpx 4rpx rgba(0,0,0,0.5));
+}
+.wheel-canvas { width: 480rpx; height: 480rpx; }
+.wheel-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80rpx; height: 80rpx; border-radius: 50%;
+  background: #ffffff; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20rpx rgba(0,0,0,0.4);
+  border: 4rpx solid rgba(0,0,0,0.2);
+}
+.center-dot {
+  width: 24rpx; height: 24rpx; border-radius: 50%;
+  background: var(--color-primary);
+}

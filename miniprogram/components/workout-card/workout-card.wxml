@@ -1,0 +1,40 @@
+<!--
+  训练计划卡片 — 7天训练安排
+-->
+<view class="workout-card">
+  <view class="card-header">
+    <text class="card-icon">💪</text>
+    <text class="card-title">训练计划</text>
+    <text class="card-subtext">{{data.place === 'home' ? '居家' : '健身房'}} · {{data.days}}天</text>
+  </view>
+
+  <!-- 训练日列表 -->
+  <view class="day-list">
+    <view
+      class="day-item {{day.focus === '休息' ? 'rest' : ''}}"
+      wx:for="{{data.schedule}}"
+      wx:key="day"
+    >
+      <!-- 训练日头部 -->
+      <view class="day-header" data-index="{{index}}" bind:tap="onToggleDay">
+        <view class="day-num">Day {{day.day}}</view>
+        <view class="day-focus {{day.focus === '休息' ? 'rest-text' : ''}}">{{day.focus}}</view>
+        <view class="expand-icon" wx:if="{{day.focus !== '休息'}}">
+          {{expandedDays[index] ? '▾' : '▸'}}
+        </view>
+      </view>
+
+      <!-- 动作详情（可折叠） -->
+      <view class="day-detail" wx:if="{{expandedDays[index] && day.focus !== '休息'}}">
+        <view class="exercise-item" wx:for="{{day.exercises}}" wx:for-item="ex" wx:key="name">
+          <view class="ex-header">
+            <text class="ex-name">{{ex.name}}</text>
+            <text class="ex-volume">{{ex.sets}}组×{{ex.reps}}次</text>
+          </view>
+          <text class="ex-notes">🟢 {{ex.notes}}</text>
+          <text class="ex-rest">休息 {{ex.rest_seconds}}秒</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

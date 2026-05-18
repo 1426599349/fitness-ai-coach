@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/chat/chat",
+    "pages/wheel/wheel",
+    "pages/exercise-lib/exercise-lib",
+    "pages/weekly-plan/weekly-plan",
+    "pages/exercise-detail/exercise-detail",
+    "pages/profile/profile",
+    "pages/privacy/privacy"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "健身AI助手",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#00d4aa",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "AI教练",
+        "iconPath": "images/tab_chat_un.png",
+        "selectedIconPath": "images/tab_chat.png"
+      },
+      {
+        "pagePath": "pages/wheel/wheel",
+        "text": "食物推荐",
+        "iconPath": "images/tab_food_un.png",
+        "selectedIconPath": "images/tab_food.png"
+      },
+      {
+        "pagePath": "pages/exercise-lib/exercise-lib",
+        "text": "动作库",
+        "iconPath": "images/tab_exercise_un.png",
+        "selectedIconPath": "images/tab_exercise.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tab_profile_un.png",
+        "selectedIconPath": "images/tab_profile.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

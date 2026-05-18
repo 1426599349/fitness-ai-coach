@@ -1,0 +1,7 @@
+.privacy-page { min-height: 100vh; background: #f5f5f5; }
+.content { padding: 40rpx 36rpx 80rpx; }
+.title { font-size: 40rpx; font-weight: 700; display: block; margin-bottom: 12rpx; }
+.update { font-size: 24rpx; color: #999; display: block; margin-bottom: 40rpx; }
+.section { font-size: 30rpx; font-weight: 600; color: #333; display: block; margin-top: 36rpx; margin-bottom: 12rpx; }
+.para { font-size: 28rpx; color: #555; line-height: 1.8; display: block; margin-bottom: 8rpx; }
+.footer { margin-top: 60rpx; text-align: center; font-size: 24rpx; color: #ccc; }

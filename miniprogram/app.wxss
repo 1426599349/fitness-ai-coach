@@ -1,0 +1,33 @@
+/**
+ * 全局样式 — 白色主题
+ */
+page {
+  --color-bg: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-surface-light: #f0f0f0;
+  --color-primary: #00d4aa;
+  --color-primary-dark: #00b894;
+  --color-accent: #6c5ce7;
+  --color-text: #333333;
+  --color-text-secondary: #888888;
+  --color-danger: #e74c3c;
+  --color-warning: #f39c12;
+  --color-success: #00d4aa;
+
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 28rpx;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-col { display: flex; flex-direction: column; }
+.text-muted { color: var(--color-text-secondary); }
+.text-primary { color: var(--color-primary); }
+.text-sm { font-size: 24rpx; }
+.text-lg { font-size: 32rpx; }
+
+::-webkit-scrollbar { width: 0; height: 0; color: transparent; }

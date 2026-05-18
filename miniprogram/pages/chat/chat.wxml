@@ -1,0 +1,77 @@
+<!--
+  AI对话首页 — 健身AI助手核心交互界面
+  布局：标题栏 + 对话列表 + 快捷操作栏 + 输入区域
+-->
+<view class="chat-container">
+
+  <!-- 积分栏 -->
+  <view class="credits-bar">
+    <view class="credits-left">
+      <text class="credits-icon">⚡</text>
+      <text class="credits-num">{{credits}}</text>
+      <text class="credits-label">积分</text>
+    </view>
+    <view class="credits-right signin-btn" bind:tap="onDailySignin">
+      <text class="signin-icon">{{signedToday ? '✅' : '🎁'}}</text>
+      <text class="signin-text">{{signedToday ? '已签到' : '签到+5'}}</text>
+    </view>
+  </view>
+
+  <!-- 对话列表 -->
+  <scroll-view
+    class="chat-list"
+    scroll-y
+    scroll-into-view="{{scrollToId}}"
+    scroll-with-animation
+    enable-passive
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{loadingHistory}}">
+      <view class="loading-dots">
+        <view class="dot"></view><view class="dot"></view><view class="dot"></view>
+      </view>
+    </view>
+
+    <!-- 消息列表 -->
+    <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="msg-wrapper">
+      <chat-bubble
+        message="{{item}}"
+        bind:action="onCardAction"
+      />
+    </view>
+
+    <!-- AI正在输入... -->
+    <view class="typing-indicator" wx:if="{{aiThinking}}">
+      <view class="typing-dot"></view>
+      <view class="typing-dot"></view>
+      <view class="typing-dot"></view>
+    </view>
+
+    <!-- 底部占位，确保最后一条消息可见 -->
+    <view style="height: 20rpx;"></view>
+  </scroll-view>
+
+  <!-- 底部输入区域 -->
+  <view class="input-area">
+    <view class="input-wrapper">
+      <input
+        class="chat-input"
+        placeholder="输入身体数据、或问我健身饮食问题..."
+        placeholder-class="input-placeholder"
+        value="{{inputText}}"
+        bind:input="onInputChange"
+        bind:confirm="onSend"
+        confirm-type="send"
+        confirm-hold
+        adjust-position="{{false}}"
+        cursor-spacing="20"
+      />
+      <view class="send-btn {{inputText ? 'active' : ''}}" bind:tap="onSend">
+        <text class="send-icon">&#10148;</text>
+      </view>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,29 @@
+<scroll-view class="privacy-page" scroll-y enhanced show-scrollbar="{{false}}">
+  <view class="content">
+    <text class="title">隐私政策</text>
+    <text class="update">更新日期：2026年5月19日</text>
+
+    <text class="section">一、信息收集</text>
+    <text class="para">本小程序仅收集您主动提供的健身相关数据，包括：身高、体重、年龄、性别、健身目标、运动基础、饮食偏好（忌口及喜欢食材）。我们不会收集您的姓名、手机号、身份证号等个人身份信息。</text>
+
+    <text class="section">二、信息使用</text>
+    <text class="para">所收集的数据仅用于为您生成个性化的健身训练计划和饮食搭配建议。您的身体数据会被加密存储于微信云开发环境中，仅您本人可读写。</text>
+
+    <text class="section">三、信息安全</text>
+    <text class="para">您的数据存储于微信云开发数据库，采用微信官方提供的安全机制。未经您的授权，我们不会将您的数据分享给任何第三方。</text>
+
+    <text class="section">四、对话数据</text>
+    <text class="para">为提供连贯的AI对话体验，我们会保存您最近的对话记录（最多20条）。该数据仅用于上下文理解，您可在「我的」页面随时清除。</text>
+
+    <text class="section">五、AI生成内容</text>
+    <text class="para">本产品使用AI大模型生成健身及饮食建议。所有建议仅供参考，不构成医疗诊断或专业指导。如有身体不适，请咨询专业医生或健身教练。</text>
+
+    <text class="section">六、您控制数据的权利</text>
+    <text class="para">您可以随时在「我的」页面编辑或更新您的身体数据、饮食偏好。您可以清除对话记录。您可以删除小程序以移除所有本地数据。</text>
+
+    <text class="section">七、联系我们</text>
+    <text class="para">如对隐私政策有任何疑问，可通过「我的」页面的意见反馈功能联系我们。</text>
+
+    <view class="footer">健身AI助手 · 保护您的数据安全</view>
+  </view>
+</scroll-view>

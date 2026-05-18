@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "meal-wheel": "../../components/meal-wheel/meal-wheel"
+  },
+  "navigationBarTitleText": "食物推荐"
+}
