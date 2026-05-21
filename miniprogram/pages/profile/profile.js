@@ -222,6 +222,10 @@ Page({
     wx.navigateTo({ url: '/pages/weekly-plan/weekly-plan' });
   },
 
+  onGoFoodLib() {
+    wx.navigateTo({ url: '/pages/food-lib/food-lib' });
+  },
+
   onGoPrivacy() {
     wx.navigateTo({ url: '/pages/privacy/privacy' });
   },
@@ -259,12 +263,13 @@ Page({
       success: async (res) => {
         if (!res.confirm) return;
 
-        // 1. 清除本地对话记忆
+        // 1. 清除本地对话记忆 + 聊天记录
         try { wx.removeStorageSync('conversationHistory'); } catch (e) {}
+        try { wx.removeStorageSync('chatMessages'); } catch (e) {}
 
-        // 2. 重置对话状态（下次进入AI教练页会重新打招呼）
+        // 2. 标记聊天页需要重置
         const app = getApp();
-        app.globalData.conversationState = 'greeting';
+        app.globalData.needClearChat = true;
 
         // 3. 云端清除
         try {

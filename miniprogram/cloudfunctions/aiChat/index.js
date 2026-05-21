@@ -179,22 +179,19 @@ exports.main = async (event, context) => {
   // --- 统一初始化积分 ---
   ensureCredits(userState);
 
-  // --- 积分校验：首次录入免费 ---
-  if (intent !== 'onboarding') {
-    const credits = userState.credits;
-    if (credits < 5) {
-      return {
-        type: 'text',
-        content: `积分不足！（当前 ${credits} 积分）\n\n每次提问消耗 5 积分，看一次视频广告可获得 10 积分。`,
-        credits: credits,
-        needCredits: true,
-      };
-    }
-    // 扣5分
-    const newCredits = credits - 5;
-    await db.collection('user_states').doc(openid).update({ data: { credits: newCredits } });
-    userState.credits = newCredits;
+  // --- 积分校验 ---
+  const credits = userState.credits;
+  if (credits < 5) {
+    return {
+      type: 'text',
+      content: `积分不足！（当前 ${credits} 分）\n\n每日签到可领取 5 积分，积分每 5 分钟自动回复 1 点`,
+      credits: credits,
+      needCredits: true,
+    };
   }
+  const newCredits = credits - 5;
+  await db.collection('user_states').doc(openid).update({ data: { credits: newCredits } });
+  userState.credits = newCredits;
 
   // --- 执行对应流程 ---
   let result;

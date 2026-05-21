@@ -1,0 +1,50 @@
+<view class="detail-page" wx:if="{{food}}">
+  <view class="hero" style="background: linear-gradient(135deg, {{food.category === '主食' ? '#fff3e0' : food.category === '主菜' ? '#fdecea' : '#e8f5e9'}}, #fff);">
+    <text class="food-emoji">{{food.category === '主食' ? '🍚' : food.category === '主菜' ? '🍖' : '🥬'}}</text>
+    <text class="food-title">{{food.name}}</text>
+    <view class="tag-row">
+      <view class="tag {{food.category === '主食' ? 'staple' : food.category === '主菜' ? 'main' : 'side'}}">{{food.category}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">营养成分（每100g）</view>
+    <view class="macro-grid">
+      <view class="macro-item">
+        <text class="macro-val">{{food.kcal}}</text>
+        <text class="macro-label">热量 (kcal)</text>
+      </view>
+      <view class="macro-item">
+        <text class="macro-val">{{food.protein}}</text>
+        <text class="macro-label">蛋白质 (g)</text>
+      </view>
+      <view class="macro-item">
+        <text class="macro-val">{{food.fat}}</text>
+        <text class="macro-label">脂肪 (g)</text>
+      </view>
+      <view class="macro-item">
+        <text class="macro-val">{{food.carb}}</text>
+        <text class="macro-label">碳水 (g)</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">热量来源占比</view>
+    <view class="bar-row">
+      <text class="bar-label">蛋白质</text>
+      <view class="bar-track"><view class="bar-fill protein" style="width: {{food.proteinPct}}%"></view></view>
+      <text class="bar-pct">{{food.proteinPct}}%</text>
+    </view>
+    <view class="bar-row">
+      <text class="bar-label">脂肪</text>
+      <view class="bar-track"><view class="bar-fill fat" style="width: {{food.fatPct}}%"></view></view>
+      <text class="bar-pct">{{food.fatPct}}%</text>
+    </view>
+    <view class="bar-row">
+      <text class="bar-label">碳水</text>
+      <view class="bar-track"><view class="bar-fill carb" style="width: {{food.carbPct}}%"></view></view>
+      <text class="bar-pct">{{food.carbPct}}%</text>
+    </view>
+  </view>
+</view>

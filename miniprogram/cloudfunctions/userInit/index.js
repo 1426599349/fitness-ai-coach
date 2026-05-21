@@ -30,6 +30,9 @@ exports.main = async (event, context) => {
     case 'submitFeedback':
       return handleSubmitFeedback(openid, event.content);
 
+    case 'syncCredits':
+      return handleSyncCredits(openid, event.credits);
+
     case 'updateProfile':
       return handleUpdateProfile(openid, profile);
 
@@ -117,6 +120,16 @@ async function handleUpdateProfile(openid, profile) {
   await db.collection('user_states').doc(openid).update({
     data: { profile, updatedAt: new Date() },
   });
+  return { success: true };
+}
+
+async function handleSyncCredits(openid, credits) {
+  if (credits === undefined || credits === null) return { success: false };
+  try {
+    await db.collection('user_states').doc(openid).update({ data: { credits, updatedAt: new Date() } });
+  } catch (e) {
+    await db.collection('user_states').doc(openid).set({ data: { openid, credits } });
+  }
   return { success: true };
 }
 

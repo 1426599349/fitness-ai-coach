@@ -1,0 +1,19 @@
+<view class="lib-page">
+  <scroll-view class="filter-bar" scroll-x enhanced show-scrollbar="{{false}}">
+    <view wx:for="{{categories}}" wx:key="*this"
+      class="filter-tag {{filter === item ? 'active' : ''}}"
+      data-filter="{{item}}" bind:tap="onFilter">{{item}}</view>
+  </scroll-view>
+
+  <scroll-view class="food-list" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="food-row" wx:for="{{foods}}" wx:key="name" data-index="{{index}}" bind:tap="onCardTap">
+      <view class="food-info">
+        <text class="food-name">{{item.name}}</text>
+        <text class="food-meta">{{item.kcal}} kcal · 蛋白{{item.protein}}g · 脂肪{{item.fat}}g · 碳水{{item.carb}}g</text>
+      </view>
+      <view class="food-tag {{item.category === '主食' ? 'staple' : item.category === '主菜' ? 'main' : 'side'}}">{{item.category}}</view>
+      <text class="arrow">&#8250;</text>
+    </view>
+    <view style="height: 40rpx;"></view>
+  </scroll-view>
+</view>

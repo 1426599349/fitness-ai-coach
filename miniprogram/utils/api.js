@@ -163,11 +163,9 @@ function localAiResponse(message) {
   const profile = (app && app.globalData && app.globalData.userProfile) ? app.globalData.userProfile : null;
   const hasProfile = !!(profile && profile.height_cm);
 
-  // 扣5分（首次录入不扣）
-  if (!(/身高|体重/.test(msg) && /\d/.test(msg) && !hasProfile)) {
-    const c = Math.max(0, getLocalCredits() - 5);
-    setLocalCredits(c);
-  }
+  // 每次提问扣5分
+  const c = Math.max(0, getLocalCredits() - 5);
+  setLocalCredits(c);
 
   let result;
 

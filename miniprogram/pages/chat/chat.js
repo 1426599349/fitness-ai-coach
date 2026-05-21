@@ -34,10 +34,22 @@ Page({
 
   onShow() {
     this.syncCredits();
-    // 如果从个人中心清除了对话记录，重置聊天界面
-    if (app.globalData.conversationState === 'greeting' && this.data.messages.length > 0) {
+    // 从个人中心触发了清除对话 → 清空消息
+    if (app.globalData.needClearChat) {
+      app.globalData.needClearChat = false;
       this.setData({ messages: [], convState: C.CONV_STATE.GREETING, showQuickActions: false });
       this.sayGreeting();
+      return;
+    }
+    // 页面被重建但 Storage 有历史消息 → 恢复
+    if (this.data.messages.length === 0) {
+      const saved = wx.getStorageSync('chatMessages');
+      if (saved && saved.length > 0) {
+        this.setData({ messages: saved });
+        if (app.globalData.userProfile) {
+          this.setData({ convState: C.CONV_STATE.READY, showQuickActions: true });
+        }
+      }
     }
   },
 
@@ -61,10 +73,14 @@ Page({
     const regen = Math.floor(elapsed / 5); // 每5分钟1点
     if (regen > 0) {
       const current = this._loadCredits();
-      const newVal = Math.min(current + regen, 200);
+      // 回复不超过200上限，但已有积分（含签到）不受影响
+      const target = Math.min(current + regen, 200);
+      const newVal = Math.max(current, target);
       if (newVal > current) {
         this._saveCredits(newVal);
         this.setData({ credits: newVal });
+        // 同步到云端
+        api.callCloudFunction('userInit', { action: 'syncCredits', credits: newVal }).catch(() => {});
       }
       wx.setStorageSync('lastCreditRegenTime', now);
     }
@@ -95,12 +111,23 @@ Page({
     const newCredits = this.data.credits + 5;
     this.setData({ credits: newCredits, signedToday: true });
     this._saveCredits(newCredits);
+    // 同步积分到云端
+    api.callCloudFunction('userInit', { action: 'syncCredits', credits: newCredits }).catch(() => {});
     wx.showToast({ title: '签到成功 +5 积分', icon: 'success' });
   },
 
   // 初始化对话
   async initChat() {
-    this.sayGreeting();
+    const saved = wx.getStorageSync('chatMessages');
+    if (saved && saved.length > 0) {
+      this.setData({ messages: saved });
+      // 恢复对话状态
+      if (app.globalData.userProfile) {
+        this.setData({ convState: C.CONV_STATE.READY, showQuickActions: true });
+      }
+    } else {
+      this.sayGreeting();
+    }
   },
 
   sayGreeting() {
@@ -135,6 +162,9 @@ Page({
   addMessage(msg) {
     const messages = [...this.data.messages, msg];
     this.setData({ messages, scrollToId: 'msg-' + msg.id });
+    // 持久化最近 50 条消息，切换 Tab 不丢失
+    const toSave = messages.slice(-50);
+    wx.setStorageSync('chatMessages', toSave);
   },
 
   onInputChange(e) {
@@ -178,7 +208,7 @@ Page({
   renderAIResponse(result) {
     // 更新积分
     if (result && result.credits !== undefined) {
-      app.globalData.credits = result.credits;
+      this._saveCredits(result.credits);
       this.setData({ credits: result.credits });
     }
 

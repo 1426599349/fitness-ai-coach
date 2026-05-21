@@ -5,6 +5,8 @@
     "pages/exercise-lib/exercise-lib",
     "pages/weekly-plan/weekly-plan",
     "pages/exercise-detail/exercise-detail",
+    "pages/food-lib/food-lib",
+    "pages/food-detail/food-detail",
     "pages/profile/profile",
     "pages/privacy/privacy"
   ],
@@ -38,6 +40,12 @@
         "text": "动作库",
         "iconPath": "images/tab_exercise_un.png",
         "selectedIconPath": "images/tab_exercise.png"
+      },
+      {
+        "pagePath": "pages/food-lib/food-lib",
+        "text": "食物库",
+        "iconPath": "images/tab_foodlib_un.png",
+        "selectedIconPath": "images/tab_foodlib.png"
       },
       {
         "pagePath": "pages/profile/profile",

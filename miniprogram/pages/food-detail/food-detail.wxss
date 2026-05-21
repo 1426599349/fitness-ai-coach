@@ -1,0 +1,27 @@
+.detail-page { min-height: 100vh; background: #f5f5f5; }
+
+.hero { padding: 50rpx 36rpx 36rpx; text-align: center; }
+.food-emoji { font-size: 100rpx; display: block; }
+.food-title { font-size: 42rpx; font-weight: 700; display: block; margin-top: 16rpx; }
+.tag-row { margin-top: 16rpx; display: flex; justify-content: center; }
+.tag { font-size: 24rpx; padding: 8rpx 24rpx; border-radius: 20rpx; }
+.tag.staple { background: #fff3e0; color: #e67e22; }
+.tag.main { background: #fdecea; color: #e74c3c; }
+.tag.side { background: #e8f5e9; color: #27ae60; }
+
+.card { margin: 20rpx 24rpx; padding: 28rpx; background: #fff; border-radius: 16rpx; }
+.section-title { font-size: 28rpx; font-weight: 600; margin-bottom: 24rpx; }
+
+.macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; }
+.macro-item { text-align: center; padding: 20rpx; background: #f9f9f9; border-radius: 12rpx; }
+.macro-val { font-size: 36rpx; font-weight: 700; color: #00d4aa; display: block; }
+.macro-label { font-size: 22rpx; color: #999; margin-top: 4rpx; display: block; }
+
+.bar-row { display: flex; align-items: center; gap: 16rpx; margin-bottom: 18rpx; }
+.bar-label { width: 80rpx; font-size: 24rpx; color: #666; }
+.bar-track { flex: 1; height: 16rpx; background: #eee; border-radius: 8rpx; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 8rpx; }
+.bar-fill.protein { background: #3498db; }
+.bar-fill.fat { background: #f39c12; }
+.bar-fill.carb { background: #e74c3c; }
+.bar-pct { width: 60rpx; font-size: 24rpx; color: #999; text-align: right; }
