@@ -32,13 +32,16 @@ function generateWorkoutPlan(place, fitnessLevel, days = 7) {
     }
     // 随机选 count 个
     const shuffled = candidates.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(ex => ({
-      name: ex.name,
-      sets: Math.floor(Math.random() * 3) + 2,   // 2-4组
-      reps: Math.floor(Math.random() * 5) + 8,   // 8-12次
-      weight: place === 'home' ? 0 : Math.floor(Math.random() * 15) + 5,
-      notes: '保持标准动作',
-    }));
+    return shuffled.slice(0, count).map(ex => {
+      const ename = ex.warning ? `${ex.name}（注意：${ex.warning}）` : ex.name;
+      return {
+        name: ename,
+        sets: Math.floor(Math.random() * 3) + 2,
+        reps: Math.floor(Math.random() * 5) + 8,
+        weight: place === 'home' ? 0 : Math.floor(Math.random() * 15) + 5,
+        notes: '保持标准动作',
+      };
+    });
   }
 
   const schedule = [];

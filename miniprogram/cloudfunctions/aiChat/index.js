@@ -287,15 +287,22 @@ async function generateWeeklyPlanWithAI(profile, feedback = '') {
 
   // 从动作库筛选候选动作
   const candidatePool = exercises.filterForPrompt(isHome ? 'home' : 'gym', level);
-  // 按肌群分组
+  // 按肌群分组，危险动作标注
   const byMuscle = {};
+  const dangerNames = {};
   for (const ex of candidatePool) {
     if (!byMuscle[ex.muscle]) byMuscle[ex.muscle] = [];
     byMuscle[ex.muscle].push(ex.name);
+    if (ex.warning) dangerNames[ex.name] = ex.warning;
   }
   const poolText = Object.entries(byMuscle)
     .map(([m, names]) => `${m}：${names.join('、')}`)
     .join('\n');
+  // 危险动作列表 + 警告规则
+  const dangerRules = Object.keys(dangerNames).length > 0
+    ? '\n\n【安全警告】以下动作必须在输出时追加警告文字：\n' +
+      Object.entries(dangerNames).map(([n, w]) => `- ${n}：输出时 name 后加 "（注意：${w}）"`).join('\n')
+    : '';
 
   const constraints = isHome
     ? '居家训练，只能用自重和哑铃/弹力带类动作。'
@@ -307,7 +314,7 @@ async function generateWeeklyPlanWithAI(profile, feedback = '') {
 ${constraints}${fb}
 
 【候选动作库】只能从以下动作名中选，不要编造：
-${poolText}
+${poolText}${dangerRules}
 
 铁律：
 1. 必须输出7天，label必须是"Day1""Day2""Day3""Day4""Day5""Day6""Day7"
@@ -347,10 +354,15 @@ JSON结构：
         label, day: i + 1,
         focus: found.focus || (found.exercises && found.exercises.length > 0 ? '训练' : '休息'),
         rest: !found.exercises || found.exercises.length === 0 || found.focus === '休息',
-        exercises: (found.exercises || []).map(ex => ({
-          name: ex.name, sets: ex.sets || 3, reps: ex.reps || 10,
-          weight: ex.weight || 0, notes: ex.notes || '保持标准动作',
-        })),
+        exercises: (found.exercises || []).map(ex => {
+          const baseName = ex.name.replace(/（注意：.*）/, '').trim();
+          const warn = dangerNames[baseName];
+          return {
+            name: warn ? `${baseName}（注意：${warn}）` : baseName,
+            sets: ex.sets || 3, reps: ex.reps || 10,
+            weight: ex.weight || 0, notes: ex.notes || '保持标准动作',
+          };
+        }),
       };
     }
     return { label, day: i + 1, focus: i < 5 && i !== 2 ? '训练' : '休息', rest: i >= 5 || i === 2, exercises: [] };
@@ -374,7 +386,8 @@ function fallbackWeeklyPlan(profile) {
       if (picked.length >= count) break;
       if (used.has(e.name)) continue;
       used.add(e.name);
-      picked.push({ name: e.name, sets: 3, reps: isHome ? 12 : 10, weight: isHome ? 0 : 15, notes: '保持标准动作' });
+      const ename = e.warning ? `${e.name}（注意：${e.warning}）` : e.name;
+      picked.push({ name: ename, sets: 3, reps: isHome ? 12 : 10, weight: isHome ? 0 : 15, notes: '保持标准动作' });
     }
     // 保底
     if (picked.length === 0) {
@@ -1036,16 +1049,22 @@ async function handleGeneralChat(openid, message, userState) {
   const history = await getConversationHistory(openid);
   const historyText = formatHistoryForPrompt(history);
 
-  // 从动作库筛选候选动作
-  const candidatePool = exercises.filterForPrompt(profile.place || 'home', profile.fitness_level || 'beginner');
-  const byMuscle = {};
-  for (const ex of candidatePool) {
-    if (!byMuscle[ex.muscle]) byMuscle[ex.muscle] = [];
-    byMuscle[ex.muscle].push(ex.name);
+  // 从动作库筛选候选动作（第二个handleGeneralChat）
+  const candidatePool2 = exercises.filterForPrompt(profile.place || 'home', profile.fitness_level || 'beginner');
+  const byMuscle2 = {};
+  const dangerNames2 = {};
+  for (const ex of candidatePool2) {
+    if (!byMuscle2[ex.muscle]) byMuscle2[ex.muscle] = [];
+    byMuscle2[ex.muscle].push(ex.name);
+    if (ex.warning) dangerNames2[ex.name] = ex.warning;
   }
-  const poolText = Object.entries(byMuscle)
+  const poolText2 = Object.entries(byMuscle2)
     .map(([m, names]) => `${m}：${names.join('、')}`)
     .join('\n');
+  const dangerRules2 = Object.keys(dangerNames2).length > 0
+    ? '\n【安全警告】以下动作输出时 name 后必须追加 "（注意：xxx）"：\n' +
+      Object.entries(dangerNames2).map(([n, w]) => `- ${n} → 加 "（注意：${w}）"`).join('\n')
+    : '';
 
   try {
     const aiResponse = await callAI([
@@ -1058,7 +1077,7 @@ async function handleGeneralChat(openid, message, userState) {
 当前训练计划：${currentPlanText}${historyText}
 
 【候选动作库】只能从以下动作中选择name，不要编造：
-${poolText}
+${poolText2}${dangerRules2}
 
 你的核心职责：自主判断用户意图。
 - 如果用户只是闲聊/咨询/问建议 → 只回复，plan 填 null
@@ -1103,10 +1122,15 @@ ${poolText}
             label, day: i + 1,
             focus: found.focus || (found.exercises && found.exercises.length ? '训练' : '休息'),
             rest: !found.exercises || !found.exercises.length || found.focus === '休息',
-            exercises: (found.exercises || []).map(e => ({
-              name: e.name, sets: e.sets || 3, reps: e.reps || 10,
-              weight: e.weight || 0, notes: e.notes || '',
-            })),
+            exercises: (found.exercises || []).map(e => {
+              const baseName = e.name.replace(/（注意：.*）/, '').trim();
+              const warn = dangerNames2[baseName];
+              return {
+                name: warn ? `${baseName}（注意：${warn}）` : baseName,
+                sets: e.sets || 3, reps: e.reps || 10,
+                weight: e.weight || 0, notes: e.notes || '',
+              };
+            }),
           };
         }
         return { label, day: i + 1, focus: i < 5 && i !== 2 ? '训练' : '休息', rest: i >= 5 || i === 2, exercises: [] };

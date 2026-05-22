@@ -13,4 +13,7 @@
 .tag.place { background: #ddd; color: #555; }
 .tips-card { margin: 0 24rpx 40rpx; padding: 28rpx; background: #fff; border-radius: 16rpx; }
 .section-title { font-size: 30rpx; font-weight: 700; margin-bottom: 20rpx; }
+.warn-box { margin-top: 18rpx; padding: 16rpx 20rpx; background: #fff3e0; border-radius: 10rpx; border-left: 6rpx solid #e67e22; }
+.warn-text { font-size: 26rpx; color: #e67e22; line-height: 1.6; }
+
 .detail-text { font-size: 28rpx; color: #444; line-height: 1.8; text-align: justify; }

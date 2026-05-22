@@ -76,5 +76,6 @@
 .param-label { font-size: 22rpx; color: var(--color-text-secondary); }
 
 .ex-note { font-size: 24rpx; color: var(--color-text-secondary); display: block; }
+.ex-warn { font-size: 22rpx; color: #e67e22; display: block; margin-top: 6rpx; padding-left: 4rpx; }
 
 .bottom-space { height: 60rpx; }

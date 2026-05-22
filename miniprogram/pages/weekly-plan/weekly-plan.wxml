@@ -63,6 +63,7 @@
               </view>
             </view>
             <text class="ex-note">💡 {{ex.notes}}</text>
+            <text class="ex-warn" wx:if="{{ex.warning}}">⚠️ {{ex.warning}}</text>
           </view>
         </view>
       </view>

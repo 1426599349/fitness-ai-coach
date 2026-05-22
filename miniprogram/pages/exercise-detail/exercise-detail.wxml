@@ -14,6 +14,9 @@
     <view class="info-row">
       <text class="ex-title">{{ex.name}}</text>
     </view>
+    <view class="warn-box" wx:if="{{ex.warning}}">
+      <text class="warn-text">⚠️ {{ex.warning}}，请注意安全</text>
+    </view>
     <view class="tag-row">
       <view class="tag" style="background: {{ex.color || '#888'}}">{{ex.muscle}}</view>
       <view class="tag level">{{ex.level}}</view>
