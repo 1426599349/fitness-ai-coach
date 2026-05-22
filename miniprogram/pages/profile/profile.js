@@ -7,6 +7,10 @@ const api = require('../../utils/api.js');
 const GOAL_MAP = { fat_loss: '减脂', muscle_gain: '增肌', shape: '塑形', maintain: '维持' };
 const GOAL_REVERSE = { '减脂': 'fat_loss', '增肌': 'muscle_gain', '塑形': 'shape', '维持': 'maintain' };
 
+const ADMIN_PASSWORD = '315315zjh';
+let avatarTapCount = 0;
+let avatarTapTimer = null;
+
 Page({
   data: {
     profile: null,
@@ -216,6 +220,28 @@ Page({
         }
       },
     });
+  },
+
+  onAvatarTap() {
+    if (avatarTapTimer) clearTimeout(avatarTapTimer);
+    avatarTapCount++;
+    avatarTapTimer = setTimeout(() => { avatarTapCount = 0; }, 1500);
+    if (avatarTapCount >= 5) {
+      avatarTapCount = 0;
+      clearTimeout(avatarTapTimer);
+      wx.showModal({
+        title: '数据看板验证',
+        editable: true,
+        placeholderText: '请输入访问密码',
+        success: (res) => {
+          if (res.confirm && res.content === ADMIN_PASSWORD) {
+            wx.navigateTo({ url: '/pages/admin-analytics/admin-analytics' });
+          } else if (res.confirm) {
+            wx.showToast({ title: '密码错误', icon: 'none' });
+          }
+        },
+      });
+    }
   },
 
   onGoWeeklyPlan() {

@@ -8,7 +8,8 @@
     "pages/food-lib/food-lib",
     "pages/food-detail/food-detail",
     "pages/profile/profile",
-    "pages/privacy/privacy"
+    "pages/privacy/privacy",
+    "pages/admin-analytics/admin-analytics"
   ],
   "window": {
     "backgroundTextStyle": "dark",

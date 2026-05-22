@@ -1,9 +1,11 @@
 const api = require('../../utils/api.js');
+const analytics = require('../../utils/analytics.js');
 
 Page({
   data: { plan: null, loading: true },
 
   onShow() {
+    analytics.track(analytics.EVENTS.view_weekly_plan);
     const cached = this.loadFromCache();
     if (cached) {
       this.setData({ plan: cached, loading: false });
@@ -115,6 +117,7 @@ Page({
     const completed = wx.getStorageSync('planCompleted') || {};
     if (ex.completed) {
       completed[ex._key] = true;
+      analytics.track(analytics.EVENTS.exercise_done);
     } else {
       delete completed[ex._key];
     }

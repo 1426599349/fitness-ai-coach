@@ -5,6 +5,7 @@ const api = require('../../utils/api.js');
 const auth = require('../../utils/auth.js');
 const C = require('../../utils/constants.js');
 const app = getApp();
+const analytics = require('../../utils/analytics.js');
 
 Page({
   data: {
@@ -111,6 +112,7 @@ Page({
     const newCredits = this.data.credits + 20;
     this.setData({ credits: newCredits, signedToday: true });
     this._saveCredits(newCredits);
+    analytics.track(analytics.EVENTS.daily_signin);
     // 同步积分到云端
     api.callCloudFunction('userInit', { action: 'syncCredits', credits: newCredits }).catch(() => {});
     wx.showToast({ title: '签到成功 +20 积分', icon: 'success' });
@@ -229,6 +231,7 @@ Page({
         this.addAIMessage(result.content, C.MSG_TYPE.METRICS, result.cardData);
         if (this.data.convState === C.CONV_STATE.ONBOARDING) {
           this.setData({ convState: C.CONV_STATE.READY, showQuickActions: true });
+          analytics.track(analytics.EVENTS.user_signup);
         }
         this.syncWeeklyPlan();
         break;
@@ -238,6 +241,7 @@ Page({
         break;
       case C.MSG_TYPE.MEAL:
         this.addAIMessage(result.content, C.MSG_TYPE.MEAL, result.cardData);
+        analytics.track(analytics.EVENTS.meal_generated);
         break;
       case C.MSG_TYPE.ONBOARDING:
         this.addAIMessage(result.content, C.MSG_TYPE.TEXT);
@@ -247,6 +251,7 @@ Page({
         this.addAIMessage(result.content, C.MSG_TYPE.TEXT);
         if (this.data.convState === C.CONV_STATE.ONBOARDING) {
           this.setData({ convState: C.CONV_STATE.READY, showQuickActions: true });
+          analytics.track(analytics.EVENTS.user_signup);
         }
         this.syncWeeklyPlan();
     }
@@ -255,13 +260,14 @@ Page({
   // 从云端拉取最新计划并缓存到本地
   async syncWeeklyPlan() {
     try {
+      const existing = wx.getStorageSync('weeklyPlan');
+      const isUpdate = !!(existing && existing.days && existing.days.length > 0);
       const res = await api.callCloudFunction('aiChat', { action: 'get_weekly_plan' });
       if (res && res.plan && res.plan.days) {
         wx.setStorageSync('weeklyPlan', JSON.stringify(res.plan));
+        analytics.track(isUpdate ? analytics.EVENTS.plan_updated : analytics.EVENTS.plan_generated);
       }
-    } catch (e) {
-      // 云端不可用时，检查本地是否已有
-    }
+    } catch (e) {}
   },
 
   // ========== 快捷操作 ==========

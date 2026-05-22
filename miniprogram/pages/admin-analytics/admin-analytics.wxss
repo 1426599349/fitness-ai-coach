@@ -1,0 +1,23 @@
+.admin-page { min-height: 100vh; background: #1a1a2e; padding: 40rpx 24rpx; color: #eee; }
+.header { margin-bottom: 40rpx; text-align: center; }
+.title { font-size: 40rpx; font-weight: 700; display: block; }
+.subtitle { font-size: 24rpx; color: #666; margin-top: 8rpx; display: block; }
+
+.loading, .error { text-align: center; padding: 80rpx; color: #888; }
+
+.section { margin-bottom: 36rpx; }
+.section-title { font-size: 28rpx; font-weight: 600; margin-bottom: 16rpx; color: #aaa; }
+
+.metric-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16rpx; }
+.metric-card { background: #16213e; border-radius: 14rpx; padding: 28rpx 16rpx; text-align: center; }
+.metric-val { font-size: 40rpx; font-weight: 700; color: #00d4aa; display: block; }
+.metric-label { font-size: 22rpx; color: #666; margin-top: 8rpx; display: block; }
+
+.chart-list { background: #16213e; border-radius: 14rpx; padding: 20rpx; }
+.chart-row { display: flex; align-items: center; gap: 16rpx; padding: 12rpx 0; }
+.chart-date { width: 120rpx; font-size: 24rpx; color: #888; }
+.chart-bar-wrap { flex: 1; height: 20rpx; background: rgba(255,255,255,0.05); border-radius: 10rpx; overflow: hidden; }
+.chart-bar { height: 100%; background: #00d4aa; border-radius: 10rpx; min-width: 4rpx; }
+.chart-val { width: 80rpx; font-size: 24rpx; color: #aaa; text-align: right; }
+
+.footer { text-align: center; padding: 40rpx; font-size: 22rpx; color: #444; }

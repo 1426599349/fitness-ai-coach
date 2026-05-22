@@ -1,6 +1,6 @@
 <scroll-view class="profile-page" scroll-y enhanced show-scrollbar="{{false}}">
   <view class="profile-header">
-    <view class="avatar-large">
+    <view class="avatar-large" bind:tap="onAvatarTap">
       <text class="avatar-emoji">🏋️</text>
     </view>
     <view class="user-info">
