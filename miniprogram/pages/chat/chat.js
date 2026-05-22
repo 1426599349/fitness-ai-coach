@@ -108,12 +108,12 @@ Page({
     }
     const today = new Date().toISOString().slice(0, 10);
     wx.setStorageSync('lastSigninDate', today);
-    const newCredits = this.data.credits + 5;
+    const newCredits = this.data.credits + 20;
     this.setData({ credits: newCredits, signedToday: true });
     this._saveCredits(newCredits);
     // 同步积分到云端
     api.callCloudFunction('userInit', { action: 'syncCredits', credits: newCredits }).catch(() => {});
-    wx.showToast({ title: '签到成功 +5 积分', icon: 'success' });
+    wx.showToast({ title: '签到成功 +20 积分', icon: 'success' });
   },
 
   // 初始化对话

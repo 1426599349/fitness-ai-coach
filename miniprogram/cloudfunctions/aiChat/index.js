@@ -184,7 +184,7 @@ exports.main = async (event, context) => {
   if (credits < 5) {
     return {
       type: 'text',
-      content: `积分不足！（当前 ${credits} 分）\n\n每日签到可领取 5 积分，积分每 5 分钟自动回复 1 点`,
+      content: `积分不足！（当前 ${credits} 分）\n\n每日签到可领取 20 积分，积分每 5 分钟自动回复 1 点`,
       credits: credits,
       needCredits: true,
     };

@@ -13,7 +13,7 @@
     </view>
     <view class="credits-right signin-btn" bind:tap="onDailySignin">
       <text class="signin-icon">{{signedToday ? '✅' : '🎁'}}</text>
-      <text class="signin-text">{{signedToday ? '已签到' : '签到+5'}}</text>
+      <text class="signin-text">{{signedToday ? '已签到' : '签到+20'}}</text>
     </view>
   </view>
 
