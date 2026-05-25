@@ -66,7 +66,7 @@
   <!-- 操作区 -->
   <view class="wheel-action-area">
     <button class="big-spin-btn" bind:tap="onStart" wx:if="{{!todayUsed}}">
-      🎰 开始转动
+      🎰 消耗10积分转一次
     </button>
     <view wx:if="{{todayUsed}}" class="retry-area">
       <button class="retry-spin-btn" bind:tap="onStart" data-retry="{{true}}">
