@@ -40,10 +40,6 @@ Page({
     const elapsed = Date.now() - t0;
     if (elapsed < 5500) await new Promise(r => setTimeout(r, 5500 - elapsed));
 
-    if (apiResult && apiResult.credits !== undefined) {
-      getApp().globalData.credits = apiResult.credits;
-    }
-
     const details = (apiResult && apiResult.details) ? apiResult.details : {};
     const update = { showWheel: false, todayUsed: true,
       mealDetail0: null, mealDetail1: null, mealDetail2: null };
