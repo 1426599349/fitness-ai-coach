@@ -77,7 +77,7 @@
     <view class="like-tags" wx:if="{{profile && profile.likedFoods && profile.likedFoods.length > 0}}">
       <view class="like-tag" wx:for="{{profile.likedFoods}}" wx:key="*this">❤️ {{item}}</view>
     </view>
-    <view class="empty-hint" wx:else>未设置喜欢食材，AI会随机推荐</view>
+    <view class="empty-hint" wx:else>未设置喜欢食材，系统会随机推荐</view>
     <view class="action-row">
       <button class="edit-btn like" bind:tap="onEditLikedFoods" size="mini">编辑喜欢食材</button>
     </view>

@@ -42,7 +42,7 @@
       />
     </view>
 
-    <!-- AI正在输入... -->
+    <!-- 正在输入... -->
     <view class="typing-indicator" wx:if="{{aiThinking}}">
       <view class="typing-dot"></view>
       <view class="typing-dot"></view>

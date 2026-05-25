@@ -26,7 +26,7 @@
     "list": [
       {
         "pagePath": "pages/chat/chat",
-        "text": "AI教练",
+        "text": "我的计划",
         "iconPath": "images/tab_chat_un.png",
         "selectedIconPath": "images/tab_chat.png"
       },

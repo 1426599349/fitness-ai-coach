@@ -7,7 +7,7 @@
   <view class="empty-box" wx:if="{{!loading && !plan}}">
     <text class="empty-icon">📋</text>
     <text class="empty-text">暂无训练计划</text>
-    <text class="empty-hint">去「AI教练」录入身体数据后，计划会自动生成</text>
+    <text class="empty-hint">去「我的计划」录入身体数据后，计划会自动生成</text>
   </view>
 
   <view wx:if="{{plan}}">
