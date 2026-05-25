@@ -4,7 +4,7 @@
 -->
 <view class="chat-container">
 
-  <!-- 积分栏 -->
+  <!-- 积分栏（连击5次解锁自由对话） -->
   <view class="credits-bar">
     <view class="credits-left">
       <text class="credits-icon">⚡</text>
@@ -53,8 +53,8 @@
     <view style="height: 20rpx;"></view>
   </scroll-view>
 
-  <!-- 底部输入区域 -->
-  <view class="input-area">
+  <!-- 底部输入区域（连击积分5次解锁） -->
+  <view class="input-area" wx:if="{{showChatInput}}">
     <view class="input-wrapper">
       <input
         class="chat-input"

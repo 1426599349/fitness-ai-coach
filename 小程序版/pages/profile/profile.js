@@ -226,7 +226,8 @@ Page({
     if (avatarTapTimer) clearTimeout(avatarTapTimer);
     avatarTapCount++;
     avatarTapTimer = setTimeout(() => { avatarTapCount = 0; }, 1500);
-    if (avatarTapCount >= 5) {
+
+    if (avatarTapCount >= 10) {
       avatarTapCount = 0;
       clearTimeout(avatarTapTimer);
       wx.showModal({

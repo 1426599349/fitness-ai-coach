@@ -14,6 +14,9 @@ miniprogram/cloudfunctions/*/node_modules/
 __pycache__/
 exercise_images/
 
+# SQLite数据库文件
+*.db
+
 # 小程序编译产物
 miniprogram/.wxapp/
 
