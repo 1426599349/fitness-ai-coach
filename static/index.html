@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>健身AI助手</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;height:100vh;display:flex;flex-direction:column}
+.tab-bar{display:flex;background:#fff;border-top:1px solid #eee;padding:8px 0 env(safe-area-inset-bottom)}
+.tab-item{flex:1;text-align:center;font-size:12px;color:#999;padding:4px 0;cursor:pointer}
+.tab-item.active{color:#00d4aa;font-weight:600}
+.tab-icon{font-size:20px;display:block}
+.page{flex:1;overflow-y:auto;display:none}
+.page.active{display:flex;flex-direction:column}
+
+/* Chat */
+.chat-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;gap:8px;max-width:85%}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.ai{align-self:flex-start}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.av.ai{background:#e8f5e9}.av.user{background:#e3f2fd}
+.bub{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
+.bub.ai{background:#fff;border-top-left-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.bub.user{background:#00d4aa;color:#fff;border-top-right-radius:4px}
+.bub.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px;min-width:240px}
+.card-tt{font-size:12px;color:#999;margin-bottom:8px}
+.card-row{padding:4px 0;font-size:13px}.card-v{color:#00d4aa;font-weight:600}
+.ex-warn{color:#e67e22;font-size:12px;margin-top:4px}
+.chat-input{padding:10px 14px;background:#fff;display:flex;gap:8px}
+.chat-input input{flex:1;padding:10px 14px;border:1px solid #e0e0e0;border-radius:20px;font-size:14px;outline:none}
+.chat-input input:focus{border-color:#00d4aa}
+.chat-input button{width:40px;height:40px;border:none;border-radius:50%;background:#00d4aa;color:#fff;font-size:18px;cursor:pointer}
+.quick-bar{display:flex;gap:6px;padding:8px 14px;background:#fff;flex-wrap:wrap}
+.qb{padding:6px 14px;border-radius:16px;font-size:12px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;color:#555}
+.qb:hover{border-color:#00d4aa;color:#00d4aa}
+
+/* Profile */
+.profile-page{padding:20px}
+.p-header{text-align:center;padding:20px 0}.p-avatar{font-size:60px}
+.p-field{background:#fff;border-radius:12px;padding:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.p-field:active{background:#f5f5f5}
+.p-label{font-size:14px;color:#666}.p-val{font-size:16px;font-weight:600;color:#333}
+.section-title{font-size:16px;font-weight:600;margin:16px 0 10px;padding:0 4px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.tag{padding:6px 14px;border-radius:16px;font-size:13px}
+.tag.avoid{background:#fdecea;color:#e74c3c}.tag.like{background:#e8f5e9;color:#27ae60}
+.p-btn{padding:8px 16px;font-size:12px;border-radius:16px;border:1px solid #ddd;background:#fff;cursor:pointer}
+.p-metrics{display:flex;gap:12px;margin-top:10px}
+.m-chip{flex:1;text-align:center;padding:10px;background:#f5f5f5;border-radius:10px;font-size:13px}
+
+/* Grid pages */
+.grid-page{padding:14px;flex:1;overflow-y:auto}
+.filter-row{display:flex;gap:8px;padding:0 0 14px;flex-wrap:wrap}
+.ftag{padding:6px 14px;border-radius:16px;font-size:12px;border:1px solid #ddd;background:#fff;cursor:pointer}
+.ftag.active{background:#00d4aa;color:#fff;border-color:#00d4aa}
+.grid-item{background:#fff;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.grid-item:active{background:#f9f9f9}
+.gi-name{font-size:15px;font-weight:500}.gi-sub{font-size:12px;color:#999;margin-top:4px}
+.gi-tag{font-size:11px;padding:2px 8px;border-radius:8px}
+.gi-tag.staple{background:#fff3e0;color:#e67e22}
+.gi-tag.main{background:#fdecea;color:#e74c3c}
+.gi-tag.side{background:#e8f5e9;color:#27ae60}
+
+/* Modal */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:100;justify-content:center;align-items:center}
+.modal.show{display:flex}
+.modal-content{background:#fff;border-radius:16px;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto}
+.modal-close{float:right;font-size:24px;cursor:pointer;color:#999}
+.m-title{font-size:20px;font-weight:700;margin-bottom:16px}
+.m-desc{font-size:14px;color:#555;line-height:1.8;margin-bottom:16px}
+.m-warn{background:#fff3e0;padding:12px;border-radius:8px;border-left:4px solid #e67e22;color:#e67e22;font-size:13px;margin-bottom:14px}
+
+/* Weekly Plan */
+.wp-day{background:#fff;border-radius:12px;padding:16px;margin-bottom:10px}
+.wp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.wp-label{font-weight:700;font-size:15px}.wp-date{font-size:12px;color:#999}.wp-focus{font-size:13px;color:#00d4aa}
+.wp-ex{padding:8px 0;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px}
+.wp-ex:last-child{border:none}
+.wp-check{width:24px;height:24px;border-radius:50%;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;flex-shrink:0}
+.wp-check.done{background:#00d4aa;border-color:#00d4aa;color:#fff}
+.wp-ex-name{flex:1;font-size:13px}.wp-ex-name.strike{text-decoration:line-through;color:#999}
+.wp-ex-params{font-size:11px;color:#999}
+.wp-btn{padding:4px 10px;font-size:11px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;margin-left:4px}
+.wp-btn.ez.active{background:#27ae60;color:#fff}
+.wp-btn.ok.active{background:#f39c12;color:#fff}
+.wp-btn.hd.active{background:#e74c3c;color:#fff}
+
+/* Signin */
+.signin-bar{text-align:center;padding:8px;background:#fff;cursor:pointer}
+.signin-bar .icon{font-size:20px}
+
+/* Onboarding Form */
+.onboard-form{background:#fff;border-radius:16px;padding:20px 24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.form-row{display:flex;align-items:center;padding:10px 0;gap:12px}
+.form-label{width:50px;font-size:14px;font-weight:600;color:#333}
+.form-row select{padding:8px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;background:#fff}
+.form-unit{font-size:13px;color:#999}
+.form-seg{display:flex;gap:6px}
+.seg{padding:6px 14px;border:1px solid #e0e0e0;border-radius:16px;font-size:13px;cursor:pointer;color:#666}
+.seg.active{background:#00d4aa;color:#fff;border-color:#00d4aa}
+.form-submit{display:block;width:100%;margin-top:16px;padding:12px;background:#00d4aa;color:#fff;border:none;border-radius:24px;font-size:16px;font-weight:600;cursor:pointer}
+
+/* Wheel */
+.wheel-page{flex:1;overflow-y:auto;padding:16px}
+.wheel-cards{display:flex;flex-direction:column;gap:16px}
+.wheel-card{background:#fff;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.wheel-meal{font-size:18px;font-weight:700;color:#00d4aa;margin-bottom:12px}
+.wheel-staple{font-size:15px;font-weight:600;margin-bottom:6px}
+.wheel-dish{font-size:14px;color:#666;margin-bottom:4px}
+.wheel-kcal{font-size:14px;font-weight:600;color:#e67e22;margin-top:8px}
+.wheel-spin{width:60px;height:60px;border:5px solid #eee;border-top:5px solid #00d4aa;border-radius:50%;margin:0 auto;animation:spin 0.8s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.slot-item{background:#fff;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);animation:slotIn 0.5s ease-out forwards;opacity:0}
+.slot-item:nth-child(1){animation-delay:0.1s}.slot-item:nth-child(2){animation-delay:0.3s}.slot-item:nth-child(3){animation-delay:0.5s}
+@keyframes slotIn{0%{transform:translateY(60px);opacity:0}100%{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- Pages -->
+<div class="page active" id="page-chat">
+ <div class="chat-list" id="chatList">
+  <div class="onboard-form" id="onboardForm">
+   <div style="text-align:center;padding:20px 0"><h3>📋 填写身体数据</h3><p style="color:#888;font-size:13px">我来为你定制专属计划</p></div>
+   <div class="form-row"><span class="form-label">身高</span><select id="obH"><option value="155">155 cm</option><option value="160">160 cm</option><option value="165" selected>165 cm</option><option value="170">170 cm</option><option value="175">175 cm</option><option value="180">180 cm</option><option value="185">185 cm</option><option value="190">190 cm</option></select><span class="form-unit">cm</span></div>
+   <div class="form-row"><span class="form-label">体重</span><select id="obW"><option value="50">50 kg</option><option value="55">55 kg</option><option value="60">60 kg</option><option value="65" selected>65 kg</option><option value="70">70 kg</option><option value="75">75 kg</option><option value="80">80 kg</option><option value="85">85 kg</option><option value="90">90 kg</option><option value="100">100 kg</option></select><span class="form-unit">kg</span></div>
+   <div class="form-row"><span class="form-label">性别</span><div class="form-seg"><span class="seg active" id="obGM" onclick="setSeg('obGM','obGF','male')">男</span><span class="seg" id="obGF" onclick="setSeg('obGF','obGM','female')">女</span></div></div>
+   <div class="form-row"><span class="form-label">年龄</span><select id="obA"><option value="18">18 岁</option><option value="22">22 岁</option><option value="25" selected>25 岁</option><option value="30">30 岁</option><option value="35">35 岁</option><option value="40">40 岁</option><option value="45">45 岁</option></select><span class="form-unit">岁</span></div>
+   <div class="form-row"><span class="form-label">目标</span><div class="form-seg"><span class="seg active" id="obFL" onclick="setSeg('obFL','obMG,obSP,obMT','fat_loss')">减脂</span><span class="seg" id="obMG" onclick="setSeg('obMG','obFL,obSP,obMT','muscle_gain')">增肌</span><span class="seg" id="obSP" onclick="setSeg('obSP','obFL,obMG,obMT','shape')">塑形</span><span class="seg" id="obMT" onclick="setSeg('obMT','obFL,obMG,obSP','maintain')">维持</span></div></div>
+   <div class="form-row"><span class="form-label">场所</span><div class="form-seg"><span class="seg active" id="obHM" onclick="setSeg('obHM','obGY','home')">🏠 居家</span><span class="seg" id="obGY" onclick="setSeg('obGY','obHM','gym')">🏋️ 健身房</span></div></div>
+   <button class="form-submit" onclick="submitOnboard()">确认提交 ✓</button>
+  </div>
+ </div>
+ <div class="quick-bar" id="quickBar" style="display:none">
+  <button class="qb" onclick="send('今天吃什么')">🍽️ 吃什么</button>
+  <button class="qb" onclick="send('换一换')">🔄 换一换</button>
+  <button class="qb" onclick="send('训练计划')">💪 训练计划</button>
+ </div>
+ <div class="chat-input">
+  <input id="chatInput" placeholder="输入消息..." onkeydown="if(event.key==='Enter')send()">
+  <button onclick="send()">➤</button>
+ </div>
+</div>
+
+<div class="page" id="page-wheel">
+ <div class="wheel-page" id="wheelPage">
+  <div style="text-align:center;padding:20px"><h3>🎰 今日三餐</h3><p style="color:#888;font-size:13px">基于你的身体数据智能搭配</p></div>
+  <div class="wheel-cards" id="wheelCards"></div>
+  <button class="form-submit" onclick="spinWheel()" style="width:200px;margin:16px auto">🔄 重新转 (消耗10积分)</button>
+ </div>
+</div>
+
+<div class="page" id="page-meal">
+ <div class="grid-page" id="foodLib"></div>
+</div>
+
+<div class="page" id="page-exercise">
+ <div class="grid-page" id="exerciseLib"></div>
+</div>
+
+<div class="page" id="page-plan">
+ <div class="grid-page" id="weeklyPlan"><div style="text-align:center;padding:60px 20px;color:#999">暂无训练计划<br>去AI教练录入身体数据后自动生成</div></div>
+</div>
+
+<div class="page" id="page-profile">
+ <div class="profile-page" id="profilePage"></div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+ <div class="tab-item active" onclick="switchTab('chat')"><span class="tab-icon">💬</span>AI教练</div>
+ <div class="tab-item" onclick="switchTab('wheel')"><span class="tab-icon">🎰</span>饮食转盘</div>
+ <div class="tab-item" onclick="switchTab('meal')"><span class="tab-icon">🍽️</span>食物库</div>
+ <div class="tab-item" onclick="switchTab('exercise')"><span class="tab-icon">🏋️</span>动作库</div>
+ <div class="tab-item" onclick="switchTab('plan')"><span class="tab-icon">📋</span>本周计划</div>
+ <div class="tab-item" onclick="switchTab('profile')"><span class="tab-icon">👤</span>我的</div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+ <div class="modal-content" id="modalContent"></div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal" onclick="if(event.target===this)closeEdit()">
+ <div class="modal-content" style="max-width:320px;text-align:center;padding:30px">
+  <div style="font-size:18px;font-weight:700;margin-bottom:16px">修改 <span id="editLabel"></span></div>
+  <input id="editInput" style="width:100%;padding:12px;border:2px solid #00d4aa;border-radius:12px;font-size:18px;text-align:center;outline:none"/>
+  <button onclick="submitEdit()" style="margin-top:16px;width:100%;padding:12px;background:#00d4aa;color:#fff;border:none;border-radius:24px;font-size:16px;font-weight:600;cursor:pointer">确认修改</button>
+ </div>
+</div>
+<script>function closeEdit(){document.getElementById('editModal').classList.remove('show')}</script>
+
+<script>const EX_DATA=[{"name": "农夫行走", "muscle": "功能性", "level": "初级", "place": "gym", "desc": "起始姿势：双手各握一个哑铃或壶铃，置于身体两侧，挺胸收腹，肩胛下沉。动作过程：保持躯干稳定，核心收紧，向前迈步行走，步幅自然，保持身体直立不晃动。呼吸节奏：迈步时呼气，落地时吸气，保持均匀呼吸。主要发力肌群：核心肌群、前臂、斜方肌、臀腿肌群。常见错误：身体侧倾或晃动，含胸驼背，低头看脚，步幅过大导致失衡。", "alias": "farmers-walk", "warning": ""}, {"name": "壶铃摇摆", "muscle": "功能性", "level": "初级", "place": "gym", "desc": "起始姿势：双脚略宽于肩，壶铃置于双脚前，屈髋屈膝，背部挺直，双手握住壶铃把手。动作过程：收紧核心，臀部发力向前推髋，将壶铃向前摆至胸部高度，然后控制壶铃下落，屈髋屈膝回到起始位。呼吸节奏：向上摆动时呼气，下落时吸气。主要发力肌群：臀大肌、腘绳肌、竖脊肌。常见错误：用肩臂力量摆动，背部弯曲，膝盖过度前移。", "alias": "kettlebell-swing", "warning": "主要发力来自臀腿而非手臂，弓背危险"}, {"name": "平板支撑（功能）", "muscle": "功能性", "level": "初级", "place": "home", "desc": "起始姿势：俯卧，双肘弯曲支撑于地面，肘关节在肩关节正下方，双脚踩地，身体离开地面，躯干伸直，头部、肩部、髋部和踝部保持在同一平面。动作过程：收紧腹部和臀部，保持身体呈一条直线，维持该姿势。呼吸节奏：自然呼吸，不要憋气。主要发力肌群：核心肌群（腹横肌、腹直肌、腹斜肌）、臀部肌群、肩部肌群。常见错误：塌腰、臀部过高或过低、头部后仰或低头。", "alias": "plank-functional", "warning": ""}, {"name": "战绳", "muscle": "功能性", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，膝盖微屈，双手各握战绳一端，手臂自然下垂。动作过程：双臂交替或同步上下摆动，产生波浪，保持核心收紧。呼吸节奏：发力时呼气，下落时吸气。主要发力肌群：肩部、手臂、核心、腿部。常见错误：手臂过度用力而非利用全身协调；膝盖锁死；呼吸紊乱。", "alias": "battle-ropes", "warning": "保持核心稳定，肩部有伤者避免大幅度甩动"}, {"name": "登山跑（功能）", "muscle": "功能性", "level": "初级", "place": "home", "desc": "起始姿势：俯卧撑姿势，双手撑地，肩在手腕正上方，身体呈直线。动作过程：交替将膝盖向胸部快速提拉，保持核心收紧，背部平直。呼吸节奏：提膝时呼气，还原时吸气。主要发力肌群：核心、髋屈肌、肩部。常见错误：臀部抬过高、背部弓起、速度过快导致动作变形。", "alias": "mountain-climbers-functional", "warning": ""}, {"name": "药球砸地", "muscle": "功能性", "level": "初级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，微屈膝，双手持药球于胸前。动作过程：迅速下蹲，将球用力砸向地面，同时爆发性伸髋伸膝。呼吸节奏：下砸时呼气，起身时吸气。主要发力肌群：臀部、大腿、核心、肩部。常见错误：砸球时手臂用力过多，未利用下肢力量；砸球后未及时接球。", "alias": "medicine-ball-slam", "warning": "注意周围空间，发力时收紧核心"}, {"name": "跳箱", "muscle": "功能性", "level": "中级", "place": "gym", "desc": "起始姿势：面对跳箱站立，双脚与肩同宽，手臂自然下垂。动作过程：屈髋屈膝下蹲，手臂后摆，然后迅速蹬地摆臂跳上箱面，落地时屈膝缓冲。呼吸节奏：下蹲吸气，起跳呼气。主要发力肌群：股四头肌、臀大肌、小腿三头肌。常见错误：落地时膝盖锁死或内扣，箱面过低导致动作变形。", "alias": "box-jump", "warning": "确保箱体稳固，落地时膝盖微屈缓冲"}, {"name": "坐姿单腿提踵", "muscle": "小腿", "level": "初级", "place": "gym", "desc": "起始姿势：坐在提踵器械上，将前脚掌置于踏板，脚跟悬空，双手握住手柄，大腿紧贴垫子。动作过程：呼气时，用小腿发力向上踮起脚跟至小腿完全收紧，稍作停顿；吸气时，缓慢下放脚跟至初始位置。主要发力肌群：腓肠肌、比目鱼肌。常见错误：动作过快、脚跟未充分下放、借助身体晃动发力。", "alias": "seated-single-leg-calf-raise", "warning": ""}, {"name": "坐姿提踵", "muscle": "小腿", "level": "初级", "place": "gym", "desc": "起始姿势：坐在提踵机上，双脚前脚掌踩踏板，膝盖抵住压垫。动作过程：呼气，小腿发力向上提踵至最高点，顶峰收缩1秒；吸气，缓慢下放至起始位。主要发力肌群：腓肠肌、比目鱼肌。常见错误：动作过快、借助惯性、脚跟未充分下放。", "alias": "seated-calf-raise", "warning": ""}, {"name": "站姿单腿提踵", "muscle": "小腿", "level": "初级", "place": "home", "desc": "起始姿势：站立，双脚与肩同宽，双手扶墙或椅背保持平衡，抬起一只脚离地。动作过程：缓慢踮起支撑脚的脚尖，至最高点停顿1秒，再缓慢下放至起始位置。呼吸节奏：向上时呼气，向下时吸气。主要发力肌群：腓肠肌、比目鱼肌。常见错误：身体晃动、动作过快、未达到最大幅度。", "alias": "single-leg-calf-raise", "warning": ""}, {"name": "站姿提踵", "muscle": "小腿", "level": "初级", "place": "gym", "desc": "起始姿势：站姿，双脚与肩同宽，脚尖朝前，双手握哑铃或扶墙保持平衡。动作过程：呼气，缓慢向上提起脚跟至最高点，感受小腿收缩；吸气，控制下落还原至起始位置。呼吸节奏：上提时呼气，下落时吸气。主要发力肌群：腓肠肌、比目鱼肌。常见错误：动作过快，未充分收缩；身体晃动借力；下落时脚跟触地过猛。", "alias": "standing-calf-raise", "warning": ""}, {"name": "跳绳", "muscle": "小腿", "level": "初级", "place": "home", "desc": "起始姿势：身体直立，双手握绳柄置于体侧，绳体位于身后。动作过程：手腕发力摇绳，绳过脚时双脚同时跳起，落地时前脚掌着地，保持膝盖微屈。呼吸节奏：起跳时吸气，落地时呼气。主要发力肌群：小腿腓肠肌、比目鱼肌。常见错误：全脚掌着地、手臂大幅摆动、跳得过高。", "alias": "jump-rope", "warning": ""}, {"name": "驴式提踵", "muscle": "小腿", "level": "中级", "place": "gym", "desc": "起始姿势：跪在平板凳上，双手撑地，躯干与地面平行，将负重片放在腘窝处。动作过程：收缩小腿肌肉，向上抬起脚跟至小腿完全收紧，顶峰收缩1秒，缓慢下放至初始位置。呼吸节奏：向上抬脚跟时呼气，下放时吸气。主要发力肌群：腓肠肌、比目鱼肌。常见错误：动作过快、未完全伸展或收缩、使用腰部代偿。", "alias": "donkey-calf-raise", "warning": ""}, {"name": "三头肌拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "tricep-stretch", "warning": ""}, {"name": "婴儿式", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "child-pose", "warning": ""}, {"name": "猫牛式拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "cat-cow-stretch", "warning": ""}, {"name": "股四头肌拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "quad-stretch", "warning": ""}, {"name": "股四头肌拉伸（站立）", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "standing-quad-stretch", "warning": ""}, {"name": "肩部拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "shoulder-stretch", "warning": ""}, {"name": "背阔肌拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "lat-stretch", "warning": ""}, {"name": "胸肌拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "chest-stretch", "warning": ""}, {"name": "腿后侧拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "hamstring-stretch", "warning": ""}, {"name": "蝴蝶拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "butterfly-stretch", "warning": ""}, {"name": "颈部侧屈拉伸", "muscle": "拉伸", "level": "初级", "place": "home", "desc": "拉伸动作，保持自然呼吸，动作幅度适中", "alias": "neck-side-stretch", "warning": ""}, {"name": "动感单车", "muscle": "有氧", "level": "初级", "place": "gym", "desc": "起始姿势：坐在动感单车上，调整座椅高度使膝盖微屈，双手轻握把手，背部挺直。动作过程：踩动踏板，保持匀速，膝盖与脚尖方向一致，避免左右晃动。呼吸节奏：有节奏地呼吸，踩踏时呼气，提拉时吸气。主要发力肌群：股四头肌、腘绳肌、小腿肌群、臀大肌。常见错误：座椅过高或过低导致膝盖压力；身体过度前倾或后仰；踩踏时膝盖外扩；阻力过大导致动作变形。", "alias": "stationary-bike", "warning": ""}, {"name": "原地踏步", "muscle": "有氧", "level": "初级", "place": "home", "desc": "起始姿势：身体直立，双脚与肩同宽，双臂自然下垂。动作过程：先抬起右腿至大腿与地面平行，同时左臂向前摆动，右臂向后摆；然后换左腿抬起，右臂前摆，左臂后摆，交替进行。呼吸节奏：抬腿时呼气，落腿时吸气。主要发力肌群：腿部肌群、核心肌群。常见错误：抬腿高度不够、身体晃动、手臂摆动幅度过大。", "alias": "marching-in-place", "warning": ""}, {"name": "椭圆机", "muscle": "有氧", "level": "初级", "place": "gym", "desc": "起始姿势：双手轻握扶手，双脚踩实踏板，身体直立，核心收紧。动作过程：腿部匀速蹬踏，保持椭圆轨迹，手臂配合摆动。呼吸节奏：匀速呼吸，避免憋气。主要发力肌群：股四头肌、臀大肌、腘绳肌、小腿肌群。常见错误：身体前倾过度、蹬踏节奏忽快忽慢、核心放松导致腰部晃动。", "alias": "elliptical", "warning": ""}, {"name": "波比跳", "muscle": "有氧", "level": "中级", "place": "home", "desc": "波比跳：起始姿势站立，双脚与肩同宽。动作过程：下蹲双手撑地，双脚后跳成平板支撑，立即做一次俯卧撑，然后双脚跳回手旁，向上纵跃。呼吸节奏：下蹲时吸气，跳起时呼气。主要发力肌群：全身肌群，尤其是腿部、核心和肩部。常见错误：塌腰或拱背，动作不连贯，落地过重。", "alias": "burpees", "warning": "全程核心收紧落地缓冲，膝盖和腰椎有问题者避免"}, {"name": "跑步机", "muscle": "有氧", "level": "初级", "place": "gym", "desc": "起始姿势：站在跑步机上，双手轻握扶手，身体直立，目视前方。动作过程：启动跑步机，先慢走热身，逐渐加速至慢跑或快跑，保持自然摆臂。呼吸节奏：有节奏地呼吸，一般两步一吸、两步一呼。主要发力肌群：腿部肌群、核心肌群、心肺系统。常见错误：身体前倾或后仰过多，手臂摆动幅度过大，跑步时脚掌落地过重。", "alias": "treadmill", "warning": ""}, {"name": "高抬腿", "muscle": "有氧", "level": "初级", "place": "home", "desc": "起始姿势：站立，双脚与肩同宽，核心收紧，双手自然下垂或屈肘置于体侧。动作过程：快速交替提膝至大腿与地面平行，同时手臂协调摆动，保持身体稳定。呼吸节奏：提膝时呼气，落地时吸气，保持均匀节奏。主要发力肌群：股四头肌、髂腰肌、核心肌群。常见错误：身体后仰、膝盖过度弯曲、落地过重、呼吸紊乱。", "alias": "high-knees", "warning": ""}, {"name": "开合跳", "muscle": "核心", "level": "初级", "place": "home", "desc": "起始姿势：站立，双脚并拢，双臂自然下垂。动作过程：双脚跳起向两侧分开，同时双臂向上举过头顶，然后跳回起始姿势。呼吸节奏：跳起分开时呼气，跳回并拢时吸气。主要发力肌群：核心、肩部、大腿。常见错误：落地时膝盖锁死或过度弯曲，手臂未完全上举。", "alias": "jumping-jacks", "warning": ""}, {"name": "死虫式", "muscle": "核心", "level": "初级", "place": "home", "desc": "仰卧，双臂伸直举向天花板，双腿屈膝抬起呈90度，腰部贴地。呼气时，右臂和左腿同时下放至接近地面，吸气还原。交替进行。主要发力肌群为腹横肌和腹直肌。常见错误：腰部离地、动作过快、呼吸不协调。", "alias": "dead-bug", "warning": ""}, {"name": "登山跑", "muscle": "核心", "level": "初级", "place": "home", "desc": "起始姿势：俯卧撑姿势，双手撑地，肩在手腕正上方，身体呈直线。动作过程：交替将膝盖向胸部快速提拉，保持躯干稳定。呼吸节奏：提膝时呼气，还原时吸气。主要发力肌群：核心肌群、髋屈肌群。常见错误：臀部抬太高、背部塌陷、节奏过快失去控制。", "alias": "mountain-climbers", "warning": ""}, {"name": "鸟狗式", "muscle": "核心", "level": "初级", "place": "home", "desc": "鸟狗式：起始姿势为四足跪姿，双手在肩正下方，双膝在髋正下方，背部平直。动作过程：同时伸直右臂和左腿，直至与地面平行，保持躯干稳定，然后缓慢收回。呼吸节奏：伸展时呼气，收回时吸气。主要发力肌群：核心肌群、臀大肌、竖脊肌。常见错误：身体晃动、拱背或塌腰、动作过快。", "alias": "bird-dog", "warning": ""}, {"name": "开合跳（热身）", "muscle": "热身", "level": "初级", "place": "home", "desc": "热身动作，保持自然呼吸，动作幅度适中", "alias": "jumping-jacks-warmup", "warning": ""}, {"name": "肩部环绕", "muscle": "热身", "level": "初级", "place": "home", "desc": "热身动作，保持自然呼吸，动作幅度适中", "alias": "shoulder-circles", "warning": ""}, {"name": "高抬腿（热身）", "muscle": "热身", "level": "初级", "place": "home", "desc": "热身动作，保持自然呼吸，动作幅度适中", "alias": "high-knees-warmup", "warning": ""}, {"name": "俯身哑铃侧平举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：双手各握哑铃，俯身至躯干与地面平行，膝盖微屈，哑铃垂于腿前。动作过程：保持背部挺直，肩胛骨收紧，向两侧平举哑铃至与肩同高，肘部微屈。呼吸节奏：上举时呼气，下放时吸气。主要发力肌群：三角肌后束。常见错误：耸肩、借助惯性摆动身体、肘部过度弯曲。", "alias": "bent-over-lateral-raise", "warning": ""}, {"name": "哑铃侧平举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：双脚与肩同宽站立，双手各持哑铃垂于体侧，掌心相对，微屈膝收腹。动作过程：肩部发力将哑铃向两侧平举至与肩同高，肘部微屈，稍停后缓慢下放。呼吸节奏：上举时呼气，下放时吸气。主要发力肌群：三角肌中束。常见错误：耸肩、身体晃动、手臂过度伸直或借力甩起。", "alias": "dumbbell-lateral-raise", "warning": ""}, {"name": "哑铃俯身飞鸟", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，微屈膝，俯身至躯干接近平行地面，双手各持哑铃自然下垂，掌心相对。动作过程：保持背部挺直，以肩部发力带动双臂向两侧打开至与肩同高，肘部微屈，稍作停顿后缓慢下放。呼吸节奏：打开时呼气，下放时吸气。主要发力肌群：三角肌后束、斜方肌中束。常见错误：耸肩、弓背、手臂过度伸直或借助惯性摆动。", "alias": "dumbbell-rear-delt-fly", "warning": ""}, {"name": "哑铃前平举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：双脚与肩同宽站立，双手各持哑铃于大腿前侧，掌心向后，肘部微屈。动作过程：保持身体稳定，肩部发力将哑铃向前平举至与肩同高，稍作停顿后缓慢下放。呼吸节奏：上举时呼气，下放时吸气。主要发力肌群：三角肌前束。常见错误：身体晃动借力、耸肩、肘部过度弯曲或锁定。", "alias": "dumbbell-front-raise", "warning": ""}, {"name": "哑铃推举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：坐于平凳，双手各握哑铃于肩两侧，掌心向前，肘部弯曲90度。动作过程：呼气，向上推举哑铃至头顶，手臂伸直但不过伸，肘部微屈；吸气，缓慢下放至起始位置。呼吸节奏：上推呼气，下放吸气。主要发力肌群：三角肌前束和中束。常见错误：耸肩、腰部过度后弓、肘部超伸。", "alias": "dumbbell-shoulder-press", "warning": ""}, {"name": "坐姿哑铃推举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：坐于训练凳，背部紧贴靠垫，双手各持哑铃于肩侧，掌心向前，肘部弯曲90度。动作过程：呼气，向上推举哑铃至手臂伸直，但肘关节不锁死；吸气，缓慢下放至起始位置。呼吸节奏：上推呼气，下放吸气。主要发力肌群：三角肌前束和中束。常见错误：耸肩、身体后仰、肘部过度外展或下放过低。", "alias": "seated-dumbbell-press", "warning": ""}, {"name": "杠铃推举", "muscle": "肩", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，双手正握杠铃杆，握距略宽于肩，杠铃置于锁骨上方，肘部略低于杠铃。动作过程：呼气，肩部发力向上推举杠铃至手臂伸直，杠铃位于头部正上方；吸气，缓慢下放杠铃至起始位置。呼吸节奏：上推呼气，下放吸气。主要发力肌群：三角肌前束、中束，肱三头肌。常见错误：过度后仰腰部、肘部外展过多、杠铃未直上直下。", "alias": "barbell-shoulder-press", "warning": "核心收紧锁住下背，大重量需护腰"}, {"name": "杠铃片侧平举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：双脚与肩同宽站立，双手各握一片杠铃片置于身体两侧，掌心相对，肘部微屈。动作过程：保持躯干稳定，以肩部发力将杠铃片向两侧平举至与肩同高，肘部微屈，稍作停顿后缓慢下放。呼吸节奏：上举时呼气，下放时吸气。主要发力肌群：三角肌中束。常见错误：耸肩、身体晃动、肘部过度弯曲或伸直。", "alias": "plate-lateral-raise", "warning": ""}, {"name": "杠铃片前平举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：站立，双脚与肩同宽，双手对握杠铃片置于大腿前，手臂微屈。动作过程：肩部发力，直臂将杠铃片向前平举至与肩同高，稍停后缓慢下放。呼吸节奏：上举呼气，下放吸气。主要发力肌群：三角肌前束。常见错误：耸肩、身体晃动、手臂完全伸直导致肘关节压力过大。", "alias": "plate-front-raise", "warning": ""}, {"name": "杠铃片环绕", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：站立，双脚与肩同宽，双手持一片杠铃片于胸前，手臂伸直。动作过程：保持手臂伸直，将杠铃片从右侧绕过头顶至左侧，再原路返回，完成环绕。呼吸节奏：环绕时呼气，复位时吸气。主要发力肌群：三角肌前束、中束。常见错误：手臂弯曲、身体晃动、速度过快。", "alias": "plate-circle", "warning": ""}, {"name": "站姿哑铃侧平举", "muscle": "肩", "level": "初级", "place": "gym", "desc": "起始姿势：双脚与肩同宽站立，双手各握哑铃垂于体侧，掌心相对，微屈膝收腹。动作过程：沉肩，肘微屈，用肩部发力向两侧平举哑铃至与肩同高，稍停后缓慢下放。呼吸节奏：上举时呼气，下放时吸气。主要发力肌群：三角肌中束。常见错误：耸肩、身体晃动、手臂过度伸直、借力甩起哑铃。", "alias": "standing-lateral-raise", "warning": ""}, {"name": "阿诺德推举", "muscle": "肩", "level": "中级", "place": "gym", "desc": "起始姿势：坐姿或站姿，双手各握哑铃于胸前，掌心朝向自己，肘部弯曲。动作过程：呼气，将哑铃向上推举并同时旋转手腕，使掌心朝前，直至手臂伸直；吸气，缓慢下放并回转手腕回到起始位置。呼吸节奏：上推呼气，下放吸气。主要发力肌群：三角肌前束和中束。常见错误：旋转手腕时耸肩，或下放速度过快失去控制。", "alias": "arnold-press", "warning": "旋转过程易伤肩关节，控制速度勿过快"}, {"name": "T杠划船", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，屈髋俯身至躯干接近平行地面，双手正握T杠把手，手臂自然下垂。动作过程：保持背部挺直，肩胛后缩带动肘部将杠铃拉向腹部，顶峰收缩1秒后缓慢下放。呼吸节奏：拉起时呼气，下放时吸气。主要发力肌群：背阔肌、斜方肌中下部、菱形肌。常见错误：含胸弓背、耸肩代偿、利用惯性甩动杠铃。", "alias": "t-bar-row", "warning": ""}, {"name": "单臂哑铃划船", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：单膝跪在平凳上，同侧手支撑，另一手持哑铃，背部挺直。动作过程：呼气，将哑铃沿身体侧后方拉至髋部，肘部贴近身体，顶峰收缩1秒；吸气，缓慢下放还原。呼吸节奏：发力时呼气，还原时吸气。主要发力肌群：背阔肌、斜方肌中下部、菱形肌、肱二头肌。常见错误：含胸弓背、身体旋转借力、手臂过度外展。", "alias": "dumbbell-one-arm-row", "warning": ""}, {"name": "反手引体向上", "muscle": "背", "level": "高级", "place": "gym", "desc": "起始姿势：双手反握横杆，握距与肩同宽，身体悬垂，手臂完全伸直。动作过程：肩胛下沉后收，背阔肌发力将身体向上拉至下巴过杆，肘部贴近身体，缓慢下放至起始位置。呼吸节奏：上拉时呼气，下放时吸气。主要发力肌群：背阔肌、肱二头肌、斜方肌中下束。常见错误：摆动身体借力、下放过快、耸肩、下巴未过杆。", "alias": "chin-up", "warning": ""}, {"name": "反手高位下拉", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：面对高位下拉机，坐于垫上，双手反握横杆（掌心朝内），握距与肩同宽，手臂伸直，躯干微后倾。动作过程：呼气，背阔肌发力将横杆下拉至胸前，肘部贴近身体，收缩背部肌肉；吸气，缓慢控制还原至起始位置。呼吸节奏：下拉时呼气，还原时吸气。主要发力肌群：背阔肌、肱二头肌、菱形肌。常见错误：身体过度后倾借力、下拉时耸肩、还原时完全放松手臂。", "alias": "reverse-grip-pulldown", "warning": ""}, {"name": "哑铃划船", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：双手各握哑铃，俯身与地面平行，背部挺直，膝盖微屈。动作过程：保持躯干稳定，将哑铃沿大腿拉至腹部，肘部贴近身体，顶峰收缩后缓慢下放。呼吸节奏：拉起时呼气，下放时吸气。主要发力肌群：背阔肌、斜方肌、菱形肌。常见错误：弓背、耸肩、借力摆动身体。", "alias": "dumbbell-row", "warning": ""}, {"name": "哑铃单臂划船", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：单膝跪在平凳上，同侧手支撑，另一手持哑铃，背部挺直。动作过程：肩胛后缩，屈肘将哑铃拉至髋部，缓慢下放。呼吸节奏：拉起时呼气，下放时吸气。主要发力肌群：背阔肌、斜方肌中下束、肱二头肌。常见错误：身体旋转借力、耸肩、手臂主导发力。", "alias": "dumbbell-one-arm-row", "warning": ""}, {"name": "器械反向飞鸟", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：坐于器械，胸部贴靠垫板，双手对握手柄，肘微屈。动作过程：呼气，肩胛后缩带动手臂向后划弧，感受背部收缩；吸气缓慢还原。呼吸节奏：后拉时呼气，还原时吸气。主要发力肌群：三角肌后束、菱形肌、斜方肌中束。常见错误：耸肩代偿、肘关节过度屈伸、身体晃动借力。", "alias": "machine-reverse-fly", "warning": ""}, {"name": "器械高位下拉", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：坐于器械，双手宽握横杆，挺胸沉肩，核心收紧。动作过程：呼气，背阔肌发力将横杆拉至锁骨上方，肘部贴近身体；吸气，缓慢还原至手臂微屈。主要发力肌群：背阔肌、大圆肌、肱二头肌。常见错误：耸肩、身体过度后仰、下拉时肘部外展。", "alias": "machine-pulldown", "warning": ""}, {"name": "坐姿划船", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：坐于器械，双脚踩踏板，膝盖微屈，双手握把手，背挺直，肩胛下沉。动作过程：呼气，背部发力将把手拉向腹部，肘部贴近身体，顶峰收缩1秒；吸气，缓慢还原至手臂伸直但保持张力。呼吸节奏：拉时呼气，放时吸气。主要发力肌群：背阔肌、斜方肌中下束、菱形肌、三角肌后束。常见错误：耸肩、含胸、身体晃动、借力过多、还原时完全放松。", "alias": "seated-cable-row", "warning": ""}, {"name": "宽握引体向上", "muscle": "背", "level": "高级", "place": "gym", "desc": "起始姿势：双手宽握单杠，掌心向前，双臂自然伸直，身体悬垂，双脚交叉离地。动作过程：呼气，背部发力将身体向上拉至下巴过杠，肘部朝下，顶峰收缩1秒；吸气，缓慢下放至手臂近乎伸直。呼吸节奏：上拉呼气，下放吸气。主要发力肌群：背阔肌、大圆肌、肱二头肌。常见错误：身体晃动借力、下放过快、耸肩代偿。", "alias": "wide-grip-pull-up", "warning": ""}, {"name": "宽握高位下拉", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：坐于器械，双手宽握横杆，挺胸沉肩，收腹。动作过程：呼气，背阔肌发力带动横杆下拉至锁骨上方，肘部贴近身体；吸气，控制缓慢还原。呼吸节奏：下拉呼气，还原吸气。主要发力肌群：背阔肌、大圆肌、肱二头肌。常见错误：身体后仰过多、耸肩、下拉幅度不足。", "alias": "wide-grip-pulldown", "warning": ""}, {"name": "小燕飞", "muscle": "背", "level": "初级", "place": "home", "desc": "起始姿势：俯卧在瑜伽垫上，双臂向前伸直，双腿并拢向后伸直，额头贴地。动作过程：吸气，同时缓慢抬起双臂、头部和胸部，双腿也微微抬离地面，感受背部肌肉收缩，保持2-3秒；呼气，缓慢放下还原。呼吸节奏：抬起时吸气，放下时呼气。主要发力肌群：竖脊肌、臀大肌、肩胛骨周围肌群。常见错误：抬起过高导致腰部代偿，颈部过度后仰，动作过快失去控制。", "alias": "superman", "warning": ""}, {"name": "山羊挺身", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：俯卧在罗马椅上，髋部贴紧垫面，双手交叉置于胸前或抱头，身体挺直。动作过程：以髋部为轴，缓慢下放上半身至与地面平行，感受背部拉伸，然后收缩下背部和臀部肌群将身体抬起至起始位置。呼吸节奏：下放时吸气，抬起时呼气。主要发力肌群：竖脊肌、臀大肌、腘绳肌。常见错误：使用腰部过度反弓，导致腰椎压力过大；动作速度过快，失去控制；颈部过度后仰或前屈。", "alias": "back-extension", "warning": ""}, {"name": "引体向上", "muscle": "背", "level": "高级", "place": "gym", "desc": "起始姿势：双手正握单杠，握距略宽于肩，身体悬垂，手臂完全伸直。动作过程：背阔肌发力带动身体向上，直至下巴过杠，肘部向下向后拉。呼吸节奏：上拉时呼气，下放时吸气。主要发力肌群：背阔肌、肱二头肌、斜方肌。常见错误：摆动身体借力、下巴未过杠、下放过快。", "alias": "pull-up", "warning": "初学者建议用弹力带或辅助机降低难度"}, {"name": "杠铃俯身划船", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，微屈膝，俯身至躯干与地面约45度，双手正握杠铃，握距略宽于肩。动作过程：保持背部挺直，肩胛骨后缩，将杠铃沿大腿拉至下腹部，顶峰收缩1秒后缓慢下放。呼吸节奏：拉起时呼气，下放时吸气。主要发力肌群：背阔肌、斜方肌中下部、菱形肌、肱二头肌。常见错误：含胸弓背、耸肩、借助惯性摆动身体、杠铃拉得过高。", "alias": "barbell-bent-over-row", "warning": ""}, {"name": "杠铃划船", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，屈髋俯身至躯干接近平行地面，双手正握杠铃与肩同宽，手臂自然下垂。动作过程：保持背部挺直，肩胛后缩带动肘部将杠铃沿大腿拉至下腹，顶峰收缩1秒后缓慢下放。呼吸节奏：拉起时呼气，下放时吸气。主要发力肌群：背阔肌、斜方肌中下束、菱形肌、肱二头肌。常见错误：含胸弓背、使用爆发力借力、杠铃轨迹偏离身体。", "alias": "barbell-row", "warning": ""}, {"name": "杠铃硬拉", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，杠铃贴近小腿，屈髋屈膝俯身，双手正握杠铃，背部挺直。动作过程：保持背部紧张，伸膝伸髋将杠铃沿小腿向上拉起，至身体直立。呼吸节奏：发力拉起时呼气，下放时吸气。主要发力肌群：竖脊肌、臀大肌、腘绳肌。常见错误：弓背、杠铃远离身体、过度伸腰。", "alias": "barbell-deadlift", "warning": "核心完全收紧再发力，弓背极易导致腰椎受伤"}, {"name": "标准引体向上", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：双手正握单杠，握距略宽于肩，身体自然悬垂，双腿交叉弯曲。动作过程：肩胛骨下沉后收，背阔肌发力将身体向上拉至下巴过杠，肘部贴近身体。呼吸节奏：上拉时呼气，下落时吸气。主要发力肌群：背阔肌、肱二头肌、斜方肌。常见错误：身体晃动借力、下落过快、下巴未过杠。", "alias": "pull-up-standard", "warning": ""}, {"name": "直臂下压", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：面对龙门架站立，双手宽握横杆，手臂伸直，身体微前倾。动作过程：保持手臂微屈，用背阔肌发力将横杆向下压至大腿前侧，然后缓慢还原。呼吸节奏：下压时呼气，还原时吸气。主要发力肌群：背阔肌、大圆肌。常见错误：手臂弯曲过多，借用肱三头肌力量；身体晃动借力。", "alias": "straight-arm-pulldown", "warning": ""}, {"name": "负重引体向上", "muscle": "背", "level": "高级", "place": "gym", "desc": "起始姿势：双手宽握单杠，掌心向前，双脚离地，身体自然悬垂，可在腰间挂负重。动作过程：背阔肌发力带动身体向上，直至下巴过杠，顶峰收缩1秒，缓慢下放至手臂接近伸直。呼吸节奏：上拉时呼气，下放时吸气。主要发力肌群：背阔肌、大圆肌、肱二头肌。常见错误：摆动身体借力、下放过快、下巴未过杠。", "alias": "weighted-pull-up", "warning": "先确保标准引体能力达标再负重"}, {"name": "超人式起身", "muscle": "背", "level": "初级", "place": "home", "desc": "起始姿势：俯卧在瑜伽垫上，双臂向前伸直，双腿向后伸直，额头贴地。动作过程：吸气，同时抬起双臂、头部和双腿，尽量抬高，使身体呈反弓形，保持2秒后呼气缓慢放下。呼吸节奏：抬起时吸气，保持时屏息，放下时呼气。主要发力肌群：竖脊肌、臀大肌、肩胛骨周围肌群。常见错误：抬起时颈部过度后仰，导致颈椎压力；双腿分开过大；利用惯性猛然抬起，应缓慢控制。", "alias": "superman-raise", "warning": ""}, {"name": "面拉", "muscle": "背", "level": "初级", "place": "gym", "desc": "起始姿势：面对龙门架，将绳索调至面部高度，双手对握绳索两端，后退一步使绳索拉紧。动作过程：肩胛后收，将绳索拉向面部，肘部向外展开，保持上臂与地面平行。呼吸节奏：向后拉时呼气，还原时吸气。主要发力肌群：三角肌后束、菱形肌、斜方肌中下束。常见错误：耸肩、肘部过低、身体晃动借力。", "alias": "face-pull", "warning": ""}, {"name": "高位下拉", "muscle": "背", "level": "中级", "place": "gym", "desc": "起始姿势：坐于器械，双手宽握横杆，挺胸沉肩，双腿固定。动作过程：呼气，背阔肌发力将横杆下拉至上胸部，肘部贴近身体；吸气，缓慢还原至起始位。主要发力肌群：背阔肌、大圆肌、肱二头肌。常见错误：身体后仰过度、耸肩、下拉至颈后。", "alias": "lat-pulldown", "warning": ""}, {"name": "上斜俯卧撑", "muscle": "胸", "level": "初级", "place": "home", "desc": "起始姿势：面对稳固的椅子或床沿站立，双手比肩略宽撑在边缘，身体呈直线，脚后跟离地。动作过程：屈肘下降身体至胸部接近边缘，保持核心收紧，然后推起还原。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：胸大肌下束、肱三头肌、三角肌前束。常见错误：塌腰或撅臀，导致腰部受力；手肘过度外展，增加肩部压力；下降幅度不足，影响训练效果。", "alias": "incline-push-up", "warning": ""}, {"name": "下斜俯卧撑", "muscle": "胸", "level": "中级", "place": "home", "desc": "起始姿势：双手撑地略宽于肩，双脚置于椅子或台阶上，身体呈直线。动作过程：屈肘下降胸部至接近地面，肘部约45度，推起还原。呼吸节奏：下降吸气，推起呼气。主要发力肌群：上胸、三角肌前束、肱三头肌。常见错误：塌腰或拱背，肘部过度外展，下降深度不足。", "alias": "decline-push-up", "warning": "头部低于心脏，头晕立即停止"}, {"name": "双杠臂屈伸", "muscle": "胸", "level": "中级", "place": "gym", "desc": "起始姿势：双手握双杠，手臂伸直支撑身体，躯干前倾约30度，双腿弯曲交叉。动作过程：缓慢屈肘下降至大臂与地面平行，肘部夹紧身体，胸部发力推起至起始位。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：胸大肌下束、肱三头肌、三角肌前束。常见错误：含胸驼背、肘部外展、下降幅度过大导致肩部压力。", "alias": "dips", "warning": "下降过深易伤肩关节，控制在舒适幅度"}, {"name": "哑铃上斜卧推", "muscle": "胸", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧于上斜凳（角度30-45度），双手各握哑铃于胸两侧，肘部弯曲90度，双脚踩实地面。动作过程：呼气，胸肌发力向上推起哑铃至手臂伸直但不锁死，顶峰收缩1秒；吸气，缓慢下放至肘略低于肩。呼吸节奏：上推呼气，下放吸气。主要发力肌群：胸大肌上束、三角肌前束、肱三头肌。常见错误：肘部过度外展、腰部拱起、下落过快、哑铃碰撞。调整角度避免肩部代偿。", "alias": "dumbbell-incline-bench-press", "warning": ""}, {"name": "哑铃下斜卧推", "muscle": "胸", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧在下斜凳上（角度15-30度），双手各持哑铃于胸部两侧，掌心朝前，双脚固定。动作过程：向上推起哑铃至手臂伸直，肘部微屈，顶峰收缩1秒，缓慢下放至胸部两侧。呼吸节奏：上推时呼气，下放时吸气。主要发力肌群：胸大肌下束、肱三头肌、三角肌前束。常见错误：下放过低导致肩部压力过大；肘部过度外展；利用惯性推起；腰部离开凳面。", "alias": "dumbbell-decline-bench-press", "warning": "需有人保护或使用安全架"}, {"name": "哑铃地板卧推", "muscle": "胸", "level": "初级", "place": "gym", "desc": "起始姿势：仰卧于地面，双膝弯曲，双脚踩实地面。双手各持哑铃，手臂伸直于胸部上方，掌心相对。动作过程：缓慢下放哑铃至大臂与地面平行，肘部呈90度角，胸肌发力推起哑铃至起始位置。呼吸节奏：下放时吸气，推起时呼气。主要发力肌群：胸大肌、肱三头肌、三角肌前束。常见错误：肘部过度外展或内收，腰部拱起，哑铃下放过低导致肩部压力过大。", "alias": "dumbbell-floor-press", "warning": ""}, {"name": "哑铃平板卧推", "muscle": "胸", "level": "初级", "place": "gym", "desc": "起始姿势：仰卧平板凳，双脚踩地，双手各持哑铃于胸侧，掌心朝前。动作过程：呼气向上推起哑铃至手臂伸直，肘微屈，吸气缓慢下放至胸侧。呼吸节奏：上推呼气，下放吸气。主要发力肌群：胸大肌、三角肌前束、肱三头肌。常见错误：肩胛骨未收紧、肘部过度外展、下落过快、腰部离凳。", "alias": "dumbbell-bench-press", "warning": ""}, {"name": "哑铃飞鸟", "muscle": "胸", "level": "初级", "place": "gym", "desc": "起始姿势：仰卧平凳，双手各持哑铃，掌心相对，双臂伸直于胸部上方。动作过程：肘部微屈，控制哑铃向两侧下放至胸大肌拉伸感，再沿原路返回起始位。呼吸节奏：下放吸气，上举呼气。主要发力肌群：胸大肌。常见错误：肘关节锁死、肩部过度外展、下落过快、含胸耸肩。", "alias": "dumbbell-flyes", "warning": ""}, {"name": "器械推胸", "muscle": "胸", "level": "中级", "place": "gym", "desc": "起始姿势：坐于器械椅上，背部紧贴靠垫，双手握把手，肘部略低于肩。动作过程：呼气，胸肌发力向前推至手臂接近伸直，稍作停顿；吸气，缓慢还原至起始位。呼吸节奏：发力时呼气，还原时吸气。主要发力肌群：胸大肌、肱三头肌、三角肌前束。常见错误：肩部耸起、背部离开靠垫、推起时肘关节锁死。", "alias": "machine-chest-press", "warning": ""}, {"name": "宽距俯卧撑", "muscle": "胸", "level": "中级", "place": "home", "desc": "起始姿势：双手宽于肩，手肘微屈，身体呈直线，核心收紧。动作过程：屈肘下降至胸部接近地面，然后推起至起始位。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：胸大肌、肱三头肌、三角肌前束。常见错误：手肘过度外展、塌腰或拱背、下降幅度不足。", "alias": "wide-push-up", "warning": ""}, {"name": "弹力带俯卧撑", "muscle": "胸", "level": "初级", "place": "home", "desc": "起始姿势：双手撑地略宽于肩，双脚踩住弹力带中段，将带子绕过背部，双手握紧带子两端。动作过程：保持身体成直线，屈肘下降至胸部贴近地面，再推起至起始位。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：胸大肌、三角肌前束、肱三头肌。常见错误：弓背或塌腰，肘关节过度外展，动作过快失去控制。", "alias": "band-push-up", "warning": ""}, {"name": "杠铃上斜卧推", "muscle": "胸", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧在上斜凳（角度30-45度），双手正握杠铃，握距略宽于肩，杠铃位于锁骨上方。动作过程：吸气，缓慢下放杠铃至上胸部，肘部外展约45度；呼气，胸肌发力推起杠铃至手臂伸直但不过伸。呼吸节奏：下放吸气，上推呼气。主要发力肌群：胸大肌上束、三角肌前束、肱三头肌。常见错误：肘部过度外展或内收；下放过低伤肩；腰部拱起借力；握距过窄或过宽。", "alias": "barbell-incline-bench-press", "warning": "大重量时建议有人保护"}, {"name": "杠铃平板卧推", "muscle": "胸", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧平板凳，双脚踩实地面，肩胛骨收紧下沉，正握杠铃置于胸上方。动作过程：吸气下放杠铃至胸中下部，肘部与身体呈45度；呼气发力推起至手臂伸直但不过伸。呼吸节奏：下放吸气，推起呼气。主要发力肌群：胸大肌、三角肌前束、肱三头肌。常见错误：肘部过度外展、腰部离凳借力、杠铃下落过低或触碰胸部反弹。", "alias": "barbell-bench-press", "warning": ""}, {"name": "标准俯卧撑", "muscle": "胸", "level": "初级", "place": "home", "desc": "起始姿势：双手撑地略宽于肩，身体呈直线，核心收紧。动作过程：屈肘下降至胸部接近地面，然后推起还原。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：胸大肌、肱三头肌、三角肌前束。常见错误：塌腰或拱背，肘部过度外展，下降幅度不足。", "alias": "push-up", "warning": ""}, {"name": "绳索夹胸（低位）", "muscle": "胸", "level": "初级", "place": "gym", "desc": "起始姿势：将绳索调至低位，双手各握一侧手柄，身体稍前倾，肘部微屈。动作过程：收缩胸肌，双手向前上方画弧线夹拢至胸前，稍作停留后缓慢还原。呼吸节奏：夹拢时呼气，还原时吸气。主要发力肌群：胸大肌上束、三角肌前束。常见错误：含胸驼背、肘关节过度伸直、使用手臂发力而非胸肌。", "alias": "cable-low-crossover", "warning": ""}, {"name": "绳索夹胸（高位）", "muscle": "胸", "level": "初级", "place": "gym", "desc": "起始姿势：面对龙门架，双手各握高位绳索手柄，手臂微屈，身体稍前倾，双脚与肩同宽。动作过程：胸肌发力，双臂向前下方夹拢至双手靠近，感受胸肌收缩，缓慢还原。呼吸节奏：夹拢时呼气，还原时吸气。主要发力肌群：胸大肌上束、三角肌前束。常见错误：含胸、手臂过度伸直、肘关节锁死。", "alias": "cable-high-crossover", "warning": ""}, {"name": "蝴蝶机夹胸", "muscle": "胸", "level": "初级", "place": "gym", "desc": "起始姿势：坐于蝴蝶机，双手握把手，肘部微屈，肩胛骨后收下沉。动作过程：呼气，胸肌发力带动双臂向胸前合拢，在顶点稍作停顿；吸气，缓慢还原至起始位。呼吸节奏：合拢时呼气，还原时吸气。主要发力肌群：胸大肌、三角肌前束。常见错误：含胸耸肩、肘关节过度伸直、还原时完全放松导致肌肉张力消失。", "alias": "pec-deck-fly", "warning": ""}, {"name": "跪姿俯卧撑", "muscle": "胸", "level": "初级", "place": "home", "desc": "起始姿势：双膝跪地，双手撑地与肩同宽，身体呈直线。动作过程：屈肘下降胸部至接近地面，然后推起还原。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：胸大肌、肱三头肌、三角肌前束。常见错误：塌腰或撅臀，导致腰部受力；肘部过度外展，增加肩关节压力。", "alias": "kneeling-push-up", "warning": ""}, {"name": "辅助双杠臂屈伸", "muscle": "胸", "level": "初级", "place": "gym", "desc": "起始姿势：双手握双杠手柄，身体悬空，肩胛下沉，肘微屈。动作过程：屈肘下沉身体至大臂与地面平行，胸肌发力推起至起始位。呼吸节奏：下落吸气，推起呼气。主要发力肌群：胸大肌下沿、肱三头肌。常见错误：含胸耸肩、身体晃动、下落过深导致肩关节压力过大。", "alias": "assisted-dips", "warning": ""}, {"name": "钻石俯卧撑", "muscle": "胸", "level": "中级", "place": "home", "desc": "起始姿势：双手拇指和食指相触呈钻石形置于胸部正下方，身体呈平板支撑，双脚并拢。动作过程：缓慢下降身体至胸部贴近手部，保持肘部贴近身体，然后发力推起至起始位。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：胸大肌中束、肱三头肌、三角肌前束。常见错误：肘部外展、塌腰、臀部过高、下降不充分。", "alias": "diamond-push-up", "warning": ""}, {"name": "V字两头起", "muscle": "腹", "level": "中级", "place": "home", "desc": "起始姿势：仰卧，双臂伸直过头，双腿并拢伸直。动作过程：同时抬起上体和双腿，双手触碰脚尖，呈V字，然后缓慢还原。呼吸节奏：起身时呼气，还原时吸气。主要发力肌群：腹直肌、髂腰肌。常见错误：利用惯性摆动，颈部过度紧张，还原时脚着地。", "alias": "v-up", "warning": ""}, {"name": "下斜仰卧起坐", "muscle": "腹", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧在下斜板上，双脚勾住挡板，双手交叉置于胸前或耳侧。动作过程：收紧腹部，向上卷起上半身至与地面约45度，缓慢下放至起始位置。呼吸节奏：卷起时呼气，下放时吸气。主要发力肌群：腹直肌、腹外斜肌。常见错误：颈部用力借力、身体抬起过高或下放过快。", "alias": "decline-sit-up", "warning": ""}, {"name": "仰卧举腿", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，双手放体侧或垫于臀下，双腿并拢伸直。动作过程：腹肌发力，双腿缓慢上举至与地面垂直，然后缓慢下放至起始位置。呼吸节奏：上举时呼气，下放时吸气。主要发力肌群：腹直肌、髂腰肌。常见错误：腰部离地、利用惯性摆动双腿、下放过快。", "alias": "lying-leg-raise", "warning": ""}, {"name": "仰卧交替抬腿", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：仰卧在瑜伽垫上，双手置于身体两侧或臀部下方，双腿伸直并拢抬起至与地面呈45度。动作过程：保持下背部贴地，交替向上抬腿至与地面垂直，再缓慢下放至起始位置。呼吸节奏：抬腿时呼气，下放时吸气。主要发力肌群：腹直肌、髂腰肌。常见错误：下背部离地、腿部下放过低、速度过快。", "alias": "flutter-kicks", "warning": ""}, {"name": "仰卧触膝卷腹", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，屈膝，双脚踩地，双手置于大腿前侧。动作过程：呼气，腹部发力卷起上背部，手指触碰膝盖，吸气缓慢下放。呼吸节奏：卷起时呼气，还原时吸气。主要发力肌群：腹直肌。常见错误：颈部过度前伸，下背部离地，速度过快。", "alias": "knee-touch-crunch", "warning": ""}, {"name": "仰卧起坐", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，屈膝90度，双脚平放地面，双手交叉置于胸前或轻触耳侧。动作过程：腹部发力卷起上背部至肩胛骨离地，缓慢下放还原。呼吸节奏：起身时呼气，下落时吸气。主要发力肌群：腹直肌。常见错误：颈部用力前伸、腰部离地、使用爆发力起身。", "alias": "sit-up", "warning": ""}, {"name": "侧卷腹", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，双膝弯曲，双脚平放地面，双手轻触耳侧，肘部向外打开。动作过程：收缩腹斜肌，向上卷起上半身，同时向一侧旋转，使肘部靠近对侧膝盖，然后缓慢下放。呼吸节奏：卷起时呼气，下放时吸气。主要发力肌群：腹外斜肌、腹内斜肌、腹直肌。常见错误：颈部用力拉扯头部，肘部内收，动作过快失去控制。", "alias": "side-crunch", "warning": ""}, {"name": "侧平板支撑", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：侧卧，双腿伸直叠放，下方手臂屈肘撑地，肘部位于肩正下方，上方手臂贴体侧。动作过程：收紧核心，髋部抬离地面，身体呈一条直线，保持15-30秒后换边。呼吸节奏：全程均匀呼吸，抬髋时呼气，保持时自然呼吸。主要发力肌群：腹外斜肌、腹横肌、臀中肌。常见错误：臀部下沉、身体扭曲、颈部过度前伸。", "alias": "side-plank", "warning": ""}, {"name": "俄罗斯转体", "muscle": "腹", "level": "初级", "place": "home", "desc": "仰卧，双腿屈膝抬起，小腿与地面平行，背部挺直，双手胸前交握。呼气，躯干向一侧旋转，手转向同侧地面；吸气，回到起始位置。主要发力肌群为腹直肌、腹内外斜肌。常见错误：含胸弓背、双腿晃动、旋转幅度过大导致腰部代偿。", "alias": "russian-twist", "warning": ""}, {"name": "卷腹", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，屈膝，双脚平放地面，双手交叉置于胸前或轻触耳侧，下背部贴地。动作过程：收缩腹肌，缓慢抬起上背部离地，至肩胛骨离地，保持下背部贴地，顶点稍停后缓慢下放。呼吸节奏：起身时呼气，下放时吸气。主要发力肌群：腹直肌。常见错误：颈部用力前伸，下背部离地，起身过快借力。", "alias": "crunch", "warning": ""}, {"name": "反向卷腹", "muscle": "腹", "level": "初级", "place": "home", "desc": "仰卧，双手放体侧或头后，双腿并拢抬起至与地面垂直。呼气时用下腹力量将臀部抬离地面，向胸部卷起；吸气时缓慢下放还原。主要发力肌群为腹直肌下部。常见错误：用惯性摆动双腿、颈部过度用力、下放时脚着地。", "alias": "reverse-crunch", "warning": ""}, {"name": "器械卷腹", "muscle": "腹", "level": "初级", "place": "gym", "desc": "起始姿势：坐于器械上，双手握把手，上背贴靠垫，腹部收紧。动作过程：呼气，腹部发力向前卷曲，使上背离开靠垫，稍停后吸气缓慢还原。呼吸节奏：卷起时呼气，还原时吸气。主要发力肌群：腹直肌。常见错误：颈部发力代偿，动作过快失去控制。", "alias": "machine-crunch", "warning": ""}, {"name": "平板支撑", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：俯卧，双肘弯曲支撑在地面上，肘关节在肩膀正下方，双臂伸直，手肘撑地，身体离开地面，双脚踩地，身体从头到脚呈一条直线。动作过程：收紧腹部和臀部，保持身体稳定，不要塌腰或弓背，坚持30-60秒。呼吸节奏：保持均匀呼吸，不要憋气。主要发力肌群：腹横肌、腹直肌、腹内外斜肌、竖脊肌、臀部肌群。常见错误：塌腰导致腰部压力过大；臀部过高或过低；头部过度前伸或后仰；憋气。", "alias": "plank", "warning": ""}, {"name": "悬垂举腿", "muscle": "腹", "level": "高级", "place": "gym", "desc": "起始姿势：双手正握单杠，身体悬垂，肩部下沉，双腿并拢伸直。动作过程：收缩腹肌，向上抬起双腿至与地面平行或更高，顶峰收缩1-2秒，缓慢下放还原。呼吸节奏：抬腿时呼气，下放时吸气。主要发力肌群：腹直肌、髂腰肌。常见错误：身体晃动借力，双腿弯曲，下落过快。", "alias": "hanging-leg-raise", "warning": "握力不足易脱手，建议使用助力带"}, {"name": "空中蹬车", "muscle": "腹", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，双手放于头后，双腿抬起呈90度，下背部贴地。动作过程：交替屈膝向胸部靠近，同时转动上身使对侧肘碰膝，另一腿伸直。呼吸节奏：蹬腿时呼气，还原时吸气。主要发力肌群：腹直肌、腹斜肌。常见错误：颈部用力、下背部离地、动作过快。", "alias": "bicycle-crunch", "warning": ""}, {"name": "负重卷腹", "muscle": "腹", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧于垫上，双手持哑铃于胸前，双腿屈膝90度，脚掌贴地。动作过程：腹部发力卷起上背部，肩胛骨离地，保持下背贴地，顶峰收缩1秒后缓慢下放。呼吸节奏：卷起时呼气，下放时吸气。主要发力肌群：腹直肌。常见错误：颈部过度前伸，下背离地，使用惯性摆动哑铃。", "alias": "weighted-crunch", "warning": "不可抱头拉扯颈椎，手轻触耳侧即可"}, {"name": "侧弓步", "muscle": "腿", "level": "初级", "place": "home", "desc": "起始姿势：站立，双脚与肩同宽，双手叉腰或置于胸前。动作过程：向右侧迈出一大步，弯曲右膝，臀部向后坐，左腿伸直，保持躯干直立。呼吸节奏：迈步时吸气，下蹲时呼气。主要发力肌群：股四头肌、臀大肌、内收肌。常见错误：膝盖超过脚尖、身体前倾、背部拱起。", "alias": "side-lunge", "warning": ""}, {"name": "保加利亚分腿蹲", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，后脚置于平凳上，前脚向前迈出一步，身体直立。动作过程：下蹲至前大腿与地面平行，后膝接近地面，然后发力站起。呼吸节奏：下蹲时吸气，站起时呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：身体过度前倾、前膝超过脚尖、后脚位置过高。", "alias": "bulgarian-split-squat", "warning": "后脚抬高增加不稳，前腿发力为主缓慢下放"}, {"name": "单腿硬拉", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：单腿站立，另一腿微屈悬空，双手持哑铃置于体前。动作过程：保持背部挺直，屈髋俯身，哑铃沿腿下降至脚踝，感受腘绳肌拉伸，然后臀部发力还原。呼吸节奏：下放时吸气，起身时呼气。主要发力肌群：腘绳肌、臀大肌、竖脊肌。常见错误：弓背、膝盖过度弯曲、重心偏移。", "alias": "single-leg-deadlift", "warning": "平衡要求高，建议扶墙辅助逐步进阶"}, {"name": "哈克深蹲", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：面对哈克机，肩扛杠铃，双脚与肩同宽，脚尖微外展。动作过程：屈髋屈膝下蹲至大腿平行地面，保持背部挺直，膝盖不过脚尖，蹬地起身。呼吸节奏：下蹲吸气，起身呼气。主要发力肌群：股四头肌、臀大肌。常见错误：膝盖内扣、弯腰、下蹲过浅。", "alias": "hack-squat", "warning": "膝盖不过脚尖，底部不弹震"}, {"name": "哑铃弓步蹲", "muscle": "腿", "level": "初级", "place": "home", "desc": "起始姿势：双手各持哑铃自然下垂，双脚与肩同宽站立。动作过程：向前迈出一步，屈膝下蹲至前腿大腿与地面平行，后腿膝盖接近地面，然后蹬地收回。呼吸节奏：下蹲时吸气，起身时呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：身体前倾、膝盖超过脚尖、后腿膝盖着地。", "alias": "dumbbell-lunge-knee", "warning": ""}, {"name": "哑铃深蹲", "muscle": "腿", "level": "初级", "place": "home", "desc": "起始姿势：双脚与肩同宽，双手各持哑铃垂于体侧，挺胸收腹，肩胛下沉。动作过程：屈髋屈膝下蹲至大腿与地面平行，膝盖不超过脚尖，然后蹬地伸膝站起。呼吸节奏：下蹲时吸气，站起时呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：弯腰驼背、膝盖内扣、重心前移、下蹲过浅。", "alias": "dumbbell-squat", "warning": ""}, {"name": "哑铃直腿硬拉", "muscle": "腿", "level": "初级", "place": "gym", "desc": "起始姿势：双脚与肩同宽站立，双手各握哑铃置于大腿前侧，膝盖微屈，背部挺直。动作过程：保持腿部微屈，以髋关节为轴心向后推臀，上身前倾，哑铃沿腿前侧下放至小腿中部，感受腘绳肌拉伸；然后臀部发力向前推，还原起始姿势。呼吸节奏：下放时吸气，起身时呼气。主要发力肌群：腘绳肌、臀大肌、竖脊肌。常见错误：弓背或膝盖过度弯曲，导致腰部压力过大；哑铃远离身体，增加下背负担。", "alias": "dumbbell-stiff-leg-deadlift", "warning": ""}, {"name": "哑铃箭步蹲", "muscle": "腿", "level": "初级", "place": "home", "desc": "起始姿势：双手各握哑铃垂于体侧，双脚与髋同宽，挺胸收腹。动作过程：向前迈出一大步，屈膝下蹲至前腿大腿与地面平行，后腿膝盖接近地面，然后前腿发力站起还原。呼吸节奏：下蹲时吸气，起身时呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：身体前倾、膝盖超过脚尖、后腿膝盖着地。", "alias": "dumbbell-lunge", "warning": ""}, {"name": "器械腿举", "muscle": "腿", "level": "中级", "place": "gym", "desc": "坐在腿举机上，背部紧贴靠垫，双脚与肩同宽踩在踏板上。呼气时缓慢蹬伸双腿至接近伸直但不过伸，吸气时控制还原至起始角度。主要发力肌群为股四头肌、臀大肌和腘绳肌。常见错误包括蹬伸过快、膝盖过伸、腰部离开靠垫、脚位过高或过低。", "alias": "leg-press", "warning": ""}, {"name": "器械腿屈伸", "muscle": "腿", "level": "初级", "place": "gym", "desc": "起始姿势：坐于器械，背部贴靠垫，双腿弯曲，小腿抵住挡板。动作过程：呼气，股四头肌发力伸直双腿至接近锁定，稍停后吸气缓慢下放还原。主要发力肌群：股四头肌。常见错误：速度过快、身体晃动、膝盖超伸。", "alias": "leg-extension", "warning": ""}, {"name": "器械腿弯举", "muscle": "腿", "level": "初级", "place": "gym", "desc": "起始姿势：坐于器械，调整挡板置于脚踝后方，大腿贴紧垫面。动作过程：呼气，股二头肌发力弯举小腿至极限，顶峰收缩1秒；吸气，缓慢下放至起始位。呼吸节奏：弯举呼气，下放吸气。主要发力肌群：股二头肌、半腱肌、半膜肌。常见错误：身体晃动借力，下放过快失去控制，挡板位置过高或过低。", "alias": "leg-curl", "warning": ""}, {"name": "器械髋内收", "muscle": "腿", "level": "初级", "place": "gym", "desc": "坐在器械上，背部贴紧靠垫，双腿置于挡板外侧，双手握把手。呼气时，双腿缓慢向内夹紧，感受大腿内侧发力；吸气时，控制阻力缓慢还原。主要发力肌群为大腿内收肌群。常见错误：使用爆发力完成动作，导致借力；还原时过快，失去肌肉张力。", "alias": "hip-adduction", "warning": ""}, {"name": "器械髋外展", "muscle": "腿", "level": "初级", "place": "gym", "desc": "起始姿势：坐于器械上，背部贴紧靠垫，双腿外侧抵住挡板，双手握把手。动作过程：呼气，用臀部发力将双腿向外打开至最大幅度，感受臀中肌收缩；吸气，缓慢控制还原。呼吸节奏：外展时呼气，还原时吸气。主要发力肌群：臀中肌、臀小肌。常见错误：身体晃动借力、打开幅度不足或过快、未控制还原。", "alias": "hip-abduction", "warning": ""}, {"name": "弓步走", "muscle": "腿", "level": "初级", "place": "home", "desc": "起始姿势：双脚与髋同宽站立，双手叉腰或自然下垂。动作过程：向前迈出一大步，屈膝下蹲至前腿大腿与地面平行，后腿膝盖接近地面，然后前腿发力蹬地站起，后腿向前迈步重复。呼吸节奏：下蹲时吸气，站起时呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：膝盖超过脚尖、身体前倾、步幅过小。", "alias": "walking-lunge", "warning": ""}, {"name": "杠铃弓箭步", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：双手正握杠铃置于肩后，挺胸收腹，双脚与肩同宽。动作过程：向前跨出一步成弓箭步，下蹲至前腿大腿与地面平行，后腿膝盖接近地面，然后发力站起回到起始位置。呼吸节奏：下蹲时吸气，站起时呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：身体前倾、膝盖超过脚尖、后腿膝盖着地。", "alias": "barbell-lunge", "warning": "重心不稳易摔倒，建议从轻重量开始"}, {"name": "杠铃深蹲", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，杠铃置于肩胛骨上，挺胸收腹，肩胛收紧。动作过程：屈髋屈膝下蹲至大腿平行或低于地面，保持背部挺直，脚跟发力站起。呼吸节奏：下蹲吸气，站起呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：膝盖内扣、过度前倾、脚跟离地、弯腰。", "alias": "barbell-squat", "warning": "大重量时需有人保护，保持脊柱中立位"}, {"name": "罗马尼亚硬拉", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与髋同宽站立，杠铃置于大腿前侧，挺胸收腹，肩胛骨下沉。动作过程：保持背部挺直，屈髋向后推，杠铃沿腿前侧下放至小腿中部，感受腘绳肌拉伸，然后伸髋发力拉起。呼吸节奏：下放时吸气，拉起时呼气。主要发力肌群：腘绳肌、臀大肌、竖脊肌。常见错误：弓背、膝盖过度前移、杠铃远离身体。", "alias": "romanian-deadlift", "warning": "保持微屈膝，腰背挺直，禁止弓腰"}, {"name": "臀推", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧，上背部靠在平凳边缘，双脚平放地面与肩同宽，杠铃置于髋部。动作过程：臀部发力向上顶起，至大腿与躯干成直线，顶峰收缩1-2秒后缓慢下放。呼吸节奏：上推时呼气，下放时吸气。主要发力肌群：臀大肌、腘绳肌。常见错误：腰部过度反弓；颈部压力过大；脚跟离地。", "alias": "hip-thrust", "warning": ""}, {"name": "臀桥", "muscle": "腿", "level": "初级", "place": "home", "desc": "仰卧，双膝弯曲，双脚平放地面，与肩同宽，手臂置于身体两侧。呼气时收紧臀部，向上抬起骨盆直至身体从肩到膝成直线。在顶部稍作停留，吸气缓慢下放还原。主要发力肌群为臀大肌和腘绳肌。常见错误：过度挺腰导致腰部代偿，或动作幅度不足。", "alias": "glute-bridge", "warning": ""}, {"name": "负重深蹲", "muscle": "腿", "level": "中级", "place": "gym", "desc": "起始姿势：双脚与肩同宽，杠铃置于斜方肌上，挺胸收腹，下背微弓。动作过程：屈髋屈膝下蹲至大腿平行地面，膝盖对准脚尖，保持躯干稳定，站起时伸髋伸膝。呼吸节奏：下蹲时吸气，站起时呼气。主要发力肌群：股四头肌、臀大肌、腘绳肌。常见错误：膝盖内扣、过度前倾、弓背、下蹲过浅或过深。", "alias": "weighted-squat", "warning": "建议在深蹲架内进行，设置好安全杆"}, {"name": "颈前深蹲", "muscle": "腿", "level": "高级", "place": "gym", "desc": "起始姿势：杠铃置于颈前锁骨和三角肌前束上，双手交叉或半握固定，肘部抬高，双脚与肩同宽。动作过程：保持背部挺直，屈髋屈膝下蹲至大腿平行或更低，然后发力站起。呼吸节奏：下蹲时吸气，站起时呼气。主要发力肌群：股四头肌、臀大肌、竖脊肌。常见错误：肘部下垂导致杠铃滑落；膝盖内扣；弯腰或过度前倾。", "alias": "front-squat", "warning": "需良好肩腕灵活性，重量过大易前倾失衡"}, {"name": "高脚杯深蹲", "muscle": "腿", "level": "初级", "place": "gym", "desc": "起始姿势：双手托住哑铃一端贴近胸口，双脚与肩同宽，脚尖微外展。动作过程：保持腰背挺直，屈髋屈膝下蹲至大腿平行地面，然后发力站起。呼吸节奏：下蹲吸气，站起呼气。主要发力肌群：股四头肌、臀大肌。常见错误：含胸驼背、膝盖内扣、重心前移。", "alias": "goblet-squat", "warning": ""}, {"name": "单腿臀桥", "muscle": "臀", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，双臂置于身体两侧，左腿屈膝脚踩地，右腿伸直抬起与左腿平行。动作过程：臀部发力向上抬起，至身体呈一条直线，稍作停留后缓慢下放。呼吸节奏：抬起时呼气，下放时吸气。主要发力肌群：臀大肌、腘绳肌。常见错误：腰部过度拱起，或抬起时身体歪斜。", "alias": "single-leg-glute-bridge", "warning": ""}, {"name": "弹力带臀桥", "muscle": "臀", "level": "初级", "place": "home", "desc": "起始姿势：仰卧，双膝弯曲，双脚平放地面与肩同宽，弹力带置于髋部上方，双手压住带子两端。动作过程：呼气，臀部发力向上抬起至肩、髋、膝成直线，顶端稍停；吸气，缓慢下放臀部接近地面。主要发力肌群：臀大肌、腘绳肌。常见错误：腰部过度反弓、使用腰部代偿、抬起时膝盖外扩。", "alias": "band-glute-bridge", "warning": ""}, {"name": "弹力带蚌式开合", "muscle": "臀", "level": "初级", "place": "home", "desc": "起始姿势：侧卧，双腿屈膝叠放，弹力带绑于膝盖上方，头部枕于下臂，上臂扶髋。动作过程：保持双脚并拢，上侧膝盖向上打开至最大幅度，感受臀部发力，缓慢下放。呼吸节奏：打开时呼气，下放时吸气。主要发力肌群：臀中肌。常见错误：身体晃动、骨盆倾斜、双脚分开。", "alias": "band-clamshell", "warning": ""}, {"name": "站姿后踢腿", "muscle": "臀", "level": "初级", "place": "home", "desc": "起始姿势：站立，双脚与肩同宽，双手扶墙或椅背保持平衡。动作过程：核心收紧，臀部发力将一条腿向后上方抬起，至最高点稍停，然后缓慢下放。呼吸节奏：抬腿时呼气，下放时吸气。主要发力肌群：臀大肌。常见错误：身体晃动、腰部代偿、抬腿过高导致骨盆翻转。", "alias": "standing-glute-kickback", "warning": ""}, {"name": "负重臀桥", "muscle": "臀", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧，屈膝，双脚平放地面，肩胛骨靠于凳上，杠铃置于髋部。动作过程：臀部发力向上抬起，至身体呈直线，顶峰收缩后缓慢下放。呼吸节奏：上抬呼气，下放吸气。主要发力肌群：臀大肌、腘绳肌。常见错误：腰部过度反弓，颈部受力，髋部未完全伸展。", "alias": "weighted-glute-bridge", "warning": "杠铃需加护垫，避免压伤髋骨"}, {"name": "上斜哑铃弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：坐于上斜凳，双手各持哑铃，手臂自然下垂，掌心相对。动作过程：呼气，弯举哑铃至肩前，顶峰收缩；吸气，缓慢下放还原。呼吸节奏：上举呼气，下放吸气。主要发力肌群：肱二头肌。常见错误：身体晃动借力，手腕弯曲，下落过快。", "alias": "incline-dumbbell-curl", "warning": ""}, {"name": "俯身哑铃臂屈伸", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：双手各持哑铃，俯身与地面平行，上臂紧贴身体两侧，前臂自然下垂。动作过程：保持上臂固定，呼气时伸直手臂向后上方抬起哑铃，感受肱三头肌收缩，吸气时缓慢还原。主要发力肌群：肱三头肌。常见错误：上臂晃动、借力腰部、速度过快。", "alias": "dumbbell-kickback", "warning": ""}, {"name": "凳上反屈伸", "muscle": "臂", "level": "初级", "place": "home", "desc": "起始姿势：背对长凳，双手撑在凳沿，手指朝前，双腿伸直，脚跟触地。动作过程：缓慢弯曲肘部，身体下降至大臂与地面平行，然后伸直手臂还原。呼吸节奏：下降时吸气，上升时呼气。主要发力肌群：肱三头肌。常见错误：肘部外展、身体下降过低导致肩部压力。", "alias": "bench-dip", "warning": ""}, {"name": "反向腕弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "反向腕弯举：起始姿势为坐姿，前臂置于大腿或凳面，手腕悬空，掌心向下握哑铃。动作过程：腕关节向上弯举至极限，稍作停顿后缓慢下放。呼吸节奏：上举时呼气，下放时吸气。主要发力肌群：前臂伸肌群。常见错误：身体晃动借力，手腕未完全伸展或收缩过快。", "alias": "reverse-wrist-curl", "warning": ""}, {"name": "哑铃弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：双手各握哑铃，站立或坐姿，手臂自然下垂，掌心朝前。动作过程：保持上臂固定，呼气同时弯曲肘部将哑铃举至肩前，顶峰收缩1秒，吸气缓慢下放至起始位。呼吸节奏：发力时呼气，还原时吸气。主要发力肌群：肱二头肌。常见错误：身体晃动借力、肘部前移、下放过快、手腕弯曲。", "alias": "dumbbell-curl", "warning": ""}, {"name": "哑铃过顶臂屈伸", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：坐于凳上，双手持哑铃举过头顶，上臂贴近耳朵，掌心相对。动作过程：保持上臂固定，屈肘将哑铃缓慢下放至头后，再发力伸直手臂还原。呼吸节奏：下放时吸气，上举时呼气。主要发力肌群：肱三头肌。常见错误：上臂晃动、肘部外展、下落速度过快。", "alias": "dumbbell-overhead-tricep-extension", "warning": ""}, {"name": "哑铃锤式弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：双手各握哑铃，掌心相对，手臂自然下垂于体侧，肘关节微屈。动作过程：保持上臂固定，呼气同时弯举哑铃至肩前，顶峰收缩1秒，吸气缓慢下放至起始位。主要发力肌群：肱肌、肱桡肌、肱二头肌。常见错误：身体晃动借力，手腕内旋或外翻，下落速度过快。", "alias": "hammer-curl", "warning": ""}, {"name": "哑铃集中弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：坐于凳上，手持哑铃，上臂固定于大腿内侧。动作过程：呼气时弯举哑铃至肩前，吸气时缓慢下放。主要发力肌群：肱二头肌。常见错误：身体晃动、肘部离开大腿、下落过快。", "alias": "concentration-curl", "warning": ""}, {"name": "坐姿集中弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：坐于凳上，双腿分开，手持哑铃置于同侧大腿内侧，上臂贴紧大腿内侧。动作过程：呼气，收缩肱二头肌弯举哑铃至肩前，顶峰收缩1秒；吸气，缓慢下放至起始位。呼吸节奏：弯举时呼气，下放时吸气。主要发力肌群：肱二头肌。常见错误：身体晃动借力，手腕过度弯曲，下落过快。", "alias": "seated-concentration-curl", "warning": ""}, {"name": "杠铃弯举", "muscle": "臂", "level": "中级", "place": "gym", "desc": "起始姿势：双手反握杠铃，与肩同宽，站姿挺胸收腹，肘部贴近身体。动作过程：保持上臂固定，呼气时弯举杠铃至肩前，顶峰收缩1秒，吸气时缓慢下放至起始位。主要发力肌群：肱二头肌。常见错误：身体晃动借力、肘部前移、下放过快失去控制。", "alias": "barbell-curl", "warning": ""}, {"name": "牧师凳弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "坐在牧师凳上，上臂后侧贴紧斜板，双手反握杠铃与肩同宽。呼气时肱二头肌发力弯举至顶峰，吸气时缓慢下放至手臂微屈。主要发力肌群为肱二头肌。常见错误：身体晃动借力、肘部离开斜板、下落过快。", "alias": "preacher-curl", "warning": ""}, {"name": "窄距俯卧撑", "muscle": "臂", "level": "中级", "place": "home", "desc": "起始姿势：双手并拢置于胸部正下方，手指相对或平行，身体呈平板支撑，核心收紧。动作过程：屈肘缓慢下降身体至胸部贴近手背，然后发力推起至手臂伸直。呼吸节奏：下降时吸气，推起时呼气。主要发力肌群：肱三头肌、胸大肌内侧、三角肌前束。常见错误：肘部过度外展、塌腰或拱背、下降幅度不足。", "alias": "close-grip-push-up", "warning": ""}, {"name": "窄距杠铃卧推", "muscle": "臂", "level": "中级", "place": "gym", "desc": "起始姿势：仰卧平凳，双脚踩实地面，双手窄握杠铃（间距小于肩宽），肘部贴近身体。动作过程：吸气，缓慢下放杠铃至胸肌中下部；呼气，发力推起杠铃至手臂接近伸直。呼吸节奏：下落吸气，上推呼气。主要发力肌群：肱三头肌、胸大肌内侧、三角肌前束。常见错误：握距过宽或过窄导致手腕压力；肘部外展过多减少三头肌刺激；下落过低或弹起借力。", "alias": "close-grip-bench-press", "warning": ""}, {"name": "绳索下压", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：面对龙门架站立，双手正握绳索手柄，肘部紧贴身体两侧，前臂与地面平行。动作过程：呼气，向下压手柄直至手臂完全伸直，肘关节微屈；吸气，缓慢还原至起始位。主要发力肌群：肱三头肌。常见错误：身体晃动、肘部外展、手腕弯曲。", "alias": "cable-pushdown", "warning": ""}, {"name": "绳索弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：面对龙门架站立，双手反握绳索手柄，肘部贴近身体两侧，掌心朝上。动作过程：保持上臂固定，呼气同时收缩肱二头肌弯举绳索至肩前，顶峰收缩1秒，吸气缓慢下放还原。主要发力肌群：肱二头肌。常见错误：身体晃动借力、肘部前移、下落过快。", "alias": "cable-curl", "warning": ""}, {"name": "绳索过顶臂屈伸", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：站立，双脚与肩同宽，双手握住绳索手柄，手臂伸直举过头顶。动作过程：保持上臂固定，缓慢弯曲肘关节，将绳索下放至头后，然后肱三头肌发力伸直手臂回到起始位置。呼吸节奏：下放时吸气，发力伸直时呼气。主要发力肌群：肱三头肌。常见错误：上臂移动、肘关节外展、使用背部代偿。", "alias": "cable-overhead-tricep-extension", "warning": ""}, {"name": "腕弯举", "muscle": "臂", "level": "初级", "place": "gym", "desc": "起始姿势：坐姿，前臂置于大腿或平凳上，手腕悬空，掌心向上握杠铃。动作过程：仅手腕向上弯举至极限，缓慢下放。呼吸节奏：弯举时呼气，下放时吸气。主要发力肌群：前臂屈肌群。常见错误：肘部离开支撑面或使用惯性借力。", "alias": "wrist-curl", "warning": ""}, {"name": "颈部画圈拉伸", "muscle": "颈", "level": "初级", "place": "home", "desc": "起始姿势：站立或坐姿，背部挺直，双肩放松，头部保持中立。动作过程：缓慢将头部向前低，然后向右、向后、向左画圈，再反向画圈，每个方向重复5-8次。呼吸节奏：向后仰时吸气，向前低时呼气。主要发力肌群：颈部深层屈肌和伸肌。常见错误：耸肩、动作过快、过度后仰导致颈部压力。", "alias": "neck-circles", "warning": ""}];const FD_DATA=[{"name": "白米饭", "category": "主食", "kcal": 130, "protein": 2.7, "fat": 0.3, "carb": 28.0}, {"name": "糙米饭", "category": "主食", "kcal": 112, "protein": 2.6, "fat": 0.4, "carb": 23.0}, {"name": "黑米饭", "category": "主食", "kcal": 110, "protein": 2.8, "fat": 0.5, "carb": 22.0}, {"name": "杂粮饭", "category": "主食", "kcal": 115, "protein": 3.0, "fat": 0.8, "carb": 22.0}, {"name": "小米饭", "category": "主食", "kcal": 115, "protein": 2.5, "fat": 0.5, "carb": 23.0}, {"name": "燕麦饭", "category": "主食", "kcal": 118, "protein": 4.0, "fat": 2.0, "carb": 21.0}, {"name": "荞麦饭", "category": "主食", "kcal": 110, "protein": 3.5, "fat": 0.8, "carb": 22.0}, {"name": "白面条", "category": "主食", "kcal": 138, "protein": 3.0, "fat": 0.5, "carb": 27.0}, {"name": "荞麦面", "category": "主食", "kcal": 120, "protein": 4.0, "fat": 1.0, "carb": 23.0}, {"name": "玉米面", "category": "主食", "kcal": 125, "protein": 3.0, "fat": 1.0, "carb": 25.0}, {"name": "拉面", "category": "主食", "kcal": 140, "protein": 3.5, "fat": 1.0, "carb": 27.0}, {"name": "刀削面", "category": "主食", "kcal": 142, "protein": 3.5, "fat": 1.0, "carb": 28.0}, {"name": "意面", "category": "主食", "kcal": 130, "protein": 5.0, "fat": 1.0, "carb": 25.0}, {"name": "米粉", "category": "主食", "kcal": 115, "protein": 1.8, "fat": 0.2, "carb": 25.0}, {"name": "米线", "category": "主食", "kcal": 112, "protein": 1.6, "fat": 0.2, "carb": 24.0}, {"name": "河粉", "category": "主食", "kcal": 110, "protein": 1.5, "fat": 0.2, "carb": 24.0}, {"name": "粉丝", "category": "主食", "kcal": 110, "protein": 0.8, "fat": 0.1, "carb": 25.0}, {"name": "馒头", "category": "主食", "kcal": 120, "protein": 3.5, "fat": 0.5, "carb": 24.0}, {"name": "花卷", "category": "主食", "kcal": 130, "protein": 3.8, "fat": 1.0, "carb": 25.0}, {"name": "包子", "category": "主食", "kcal": 140, "protein": 6.0, "fat": 4.0, "carb": 22.0}, {"name": "烧麦", "category": "主食", "kcal": 145, "protein": 4.0, "fat": 4.0, "carb": 24.0}, {"name": "饺子", "category": "主食", "kcal": 150, "protein": 8.0, "fat": 5.0, "carb": 20.0}, {"name": "馄饨", "category": "主食", "kcal": 130, "protein": 7.0, "fat": 4.0, "carb": 18.0}, {"name": "汤圆", "category": "主食", "kcal": 150, "protein": 3.0, "fat": 3.0, "carb": 27.0}, {"name": "红薯", "category": "主食", "kcal": 86, "protein": 1.6, "fat": 0.1, "carb": 20.0}, {"name": "紫薯", "category": "主食", "kcal": 82, "protein": 1.8, "fat": 0.1, "carb": 19.0}, {"name": "玉米", "category": "主食", "kcal": 96, "protein": 3.4, "fat": 1.2, "carb": 21.0}, {"name": "山药", "category": "主食", "kcal": 57, "protein": 1.5, "fat": 0.1, "carb": 12.0}, {"name": "芋头", "category": "主食", "kcal": 80, "protein": 2.0, "fat": 0.2, "carb": 17.0}, {"name": "土豆", "category": "主食", "kcal": 77, "protein": 2.0, "fat": 0.1, "carb": 17.0}, {"name": "南瓜", "category": "主食", "kcal": 26, "protein": 1.0, "fat": 0.1, "carb": 6.0}, {"name": "全麦面包", "category": "主食", "kcal": 70, "protein": 3.0, "fat": 0.8, "carb": 12.0}, {"name": "吐司", "category": "主食", "kcal": 75, "protein": 2.5, "fat": 1.0, "carb": 13.0}, {"name": "法棍", "category": "主食", "kcal": 80, "protein": 2.8, "fat": 1.0, "carb": 14.0}, {"name": "贝果", "category": "主食", "kcal": 90, "protein": 3.0, "fat": 1.0, "carb": 16.0}, {"name": "杂粮饼", "category": "主食", "kcal": 120, "protein": 3.0, "fat": 3.0, "carb": 20.0}, {"name": "煎饼", "category": "主食", "kcal": 130, "protein": 3.5, "fat": 3.5, "carb": 21.0}, {"name": "手抓饼", "category": "主食", "kcal": 280, "protein": 5.0, "fat": 18.0, "carb": 22.0}, {"name": "卷饼", "category": "主食", "kcal": 135, "protein": 4.0, "fat": 4.0, "carb": 22.0}, {"name": "盐煎肉", "category": "主菜", "kcal": 278, "protein": 18.2, "fat": 22.1, "carb": 3.2}, {"name": "回锅肉", "category": "主菜", "kcal": 285, "protein": 17.5, "fat": 23.5, "carb": 3.5}, {"name": "红烧肉", "category": "主菜", "kcal": 390, "protein": 12.8, "fat": 37.0, "carb": 1.9}, {"name": "粉蒸肉", "category": "主菜", "kcal": 320, "protein": 15.1, "fat": 28.5, "carb": 12.3}, {"name": "梅菜扣肉", "category": "主菜", "kcal": 380, "protein": 13.5, "fat": 35.0, "carb": 5.6}, {"name": "小炒肉", "category": "主菜", "kcal": 210, "protein": 16.8, "fat": 15.2, "carb": 3.1}, {"name": "鱼香肉丝", "category": "主菜", "kcal": 185, "protein": 15.7, "fat": 9.8, "carb": 11.2}, {"name": "宫保鸡丁", "category": "主菜", "kcal": 220, "protein": 18.5, "fat": 12.0, "carb": 10.1}, {"name": "辣子鸡", "category": "主菜", "kcal": 320, "protein": 18.6, "fat": 26.5, "carb": 3.2}, {"name": "白切鸡", "category": "主菜", "kcal": 150, "protein": 23.5, "fat": 5.6, "carb": 0.0}, {"name": "烧鸡", "category": "主菜", "kcal": 190, "protein": 22.0, "fat": 10.5, "carb": 1.0}, {"name": "烤鸡", "category": "主菜", "kcal": 180, "protein": 21.8, "fat": 9.6, "carb": 0.0}, {"name": "卤鸡腿", "category": "主菜", "kcal": 160, "protein": 22.5, "fat": 6.8, "carb": 0.0}, {"name": "炸鸡腿", "category": "主菜", "kcal": 275, "protein": 18.2, "fat": 20.5, "carb": 1.3}, {"name": "鸡胸肉", "category": "主菜", "kcal": 118, "protein": 23.5, "fat": 1.8, "carb": 0.0}, {"name": "口水鸡", "category": "主菜", "kcal": 195, "protein": 21.0, "fat": 11.5, "carb": 2.0}, {"name": "黄焖鸡", "category": "主菜", "kcal": 180, "protein": 19.5, "fat": 9.8, "carb": 6.5}, {"name": "水煮鱼", "category": "主菜", "kcal": 165, "protein": 20.5, "fat": 8.2, "carb": 1.5}, {"name": "酸菜鱼", "category": "主菜", "kcal": 130, "protein": 19.2, "fat": 5.1, "carb": 1.2}, {"name": "清蒸鱼", "category": "主菜", "kcal": 98, "protein": 18.5, "fat": 2.1, "carb": 0.0}, {"name": "红烧鱼", "category": "主菜", "kcal": 140, "protein": 18.1, "fat": 6.8, "carb": 1.0}, {"name": "香煎鱼", "category": "主菜", "kcal": 150, "protein": 18.3, "fat": 7.9, "carb": 0.0}, {"name": "烤鱼", "category": "主菜", "kcal": 175, "protein": 19.0, "fat": 9.5, "carb": 1.1}, {"name": "炸鱼", "category": "主菜", "kcal": 220, "protein": 17.5, "fat": 15.8, "carb": 1.2}, {"name": "鱼块", "category": "主菜", "kcal": 135, "protein": 18.8, "fat": 5.9, "carb": 0.0}, {"name": "鱼排", "category": "主菜", "kcal": 160, "protein": 19.5, "fat": 8.3, "carb": 0.0}, {"name": "番茄炒蛋", "category": "主菜", "kcal": 124, "protein": 8.2, "fat": 8.1, "carb": 4.7}, {"name": "韭菜炒蛋", "category": "主菜", "kcal": 118, "protein": 7.9, "fat": 7.5, "carb": 3.2}, {"name": "青椒炒蛋", "category": "主菜", "kcal": 110, "protein": 7.5, "fat": 6.9, "carb": 2.8}, {"name": "荷包蛋", "category": "主菜", "kcal": 143, "protein": 6.3, "fat": 12.2, "carb": 0.6}, {"name": "蒸蛋", "category": "主菜", "kcal": 75, "protein": 6.5, "fat": 4.8, "carb": 1.2}, {"name": "卤蛋", "category": "主菜", "kcal": 140, "protein": 6.8, "fat": 11.5, "carb": 1.0}, {"name": "茶叶蛋", "category": "主菜", "kcal": 142, "protein": 6.7, "fat": 11.8, "carb": 1.1}, {"name": "水煮牛肉", "category": "主菜", "kcal": 155, "protein": 22.5, "fat": 6.1, "carb": 2.3}, {"name": "小炒黄牛肉", "category": "主菜", "kcal": 160, "protein": 22.8, "fat": 6.5, "carb": 1.2}, {"name": "红烧牛肉", "category": "主菜", "kcal": 180, "protein": 21.5, "fat": 9.6, "carb": 1.5}, {"name": "卤牛肉", "category": "主菜", "kcal": 115, "protein": 22.0, "fat": 2.5, "carb": 1.0}, {"name": "烤牛肉", "category": "主菜", "kcal": 140, "protein": 21.8, "fat": 5.6, "carb": 0.0}, {"name": "牛排", "category": "主菜", "kcal": 165, "protein": 22.5, "fat": 7.8, "carb": 0.0}, {"name": "卤排骨", "category": "主菜", "kcal": 215, "protein": 16.8, "fat": 15.5, "carb": 0.0}, {"name": "红烧排骨", "category": "主菜", "kcal": 270, "protein": 15.2, "fat": 22.8, "carb": 1.1}, {"name": "清炖排骨", "category": "主菜", "kcal": 190, "protein": 16.5, "fat": 13.2, "carb": 0.8}, {"name": "烤排骨", "category": "主菜", "kcal": 240, "protein": 16.1, "fat": 18.5, "carb": 0.9}, {"name": "糖醋排骨", "category": "主菜", "kcal": 280, "protein": 14.5, "fat": 20.1, "carb": 12.5}, {"name": "烤五花肉", "category": "主菜", "kcal": 380, "protein": 12.5, "fat": 36.0, "carb": 1.2}, {"name": "卤肉", "category": "主菜", "kcal": 260, "protein": 17.0, "fat": 20.5, "carb": 1.3}, {"name": "酱牛肉", "category": "主菜", "kcal": 112, "protein": 22.3, "fat": 2.1, "carb": 0.9}, {"name": "酱肘子", "category": "主菜", "kcal": 300, "protein": 15.0, "fat": 26.5, "carb": 1.0}, {"name": "白切肉", "category": "主菜", "kcal": 220, "protein": 14.8, "fat": 18.0, "carb": 0.8}, {"name": "腊肉", "category": "主菜", "kcal": 390, "protein": 12.0, "fat": 37.0, "carb": 1.5}, {"name": "腊肠", "category": "主菜", "kcal": 410, "protein": 11.0, "fat": 39.0, "carb": 2.1}, {"name": "西兰花", "category": "配菜", "kcal": 34, "protein": 2.8, "fat": 0.4, "carb": 7.0}, {"name": "菜花", "category": "配菜", "kcal": 27, "protein": 2.1, "fat": 0.3, "carb": 5.3}, {"name": "菠菜", "category": "配菜", "kcal": 23, "protein": 2.9, "fat": 0.4, "carb": 3.6}, {"name": "油麦菜", "category": "配菜", "kcal": 20, "protein": 1.5, "fat": 0.4, "carb": 3.4}, {"name": "生菜", "category": "配菜", "kcal": 16, "protein": 1.4, "fat": 0.2, "carb": 3.0}, {"name": "空心菜", "category": "配菜", "kcal": 20, "protein": 1.8, "fat": 0.3, "carb": 3.1}, {"name": "小白菜", "category": "配菜", "kcal": 17, "protein": 1.5, "fat": 0.3, "carb": 2.9}, {"name": "大白菜", "category": "配菜", "kcal": 15, "protein": 1.2, "fat": 0.2, "carb": 2.4}, {"name": "娃娃菜", "category": "配菜", "kcal": 18, "protein": 1.6, "fat": 0.2, "carb": 3.2}, {"name": "芹菜", "category": "配菜", "kcal": 16, "protein": 0.8, "fat": 0.1, "carb": 3.0}, {"name": "韭菜", "category": "配菜", "kcal": 25, "protein": 2.0, "fat": 0.4, "carb": 4.5}, {"name": "香菜", "category": "配菜", "kcal": 23, "protein": 1.8, "fat": 0.4, "carb": 3.5}, {"name": "茼蒿", "category": "配菜", "kcal": 20, "protein": 1.9, "fat": 0.3, "carb": 2.5}, {"name": "苋菜", "category": "配菜", "kcal": 25, "protein": 2.0, "fat": 0.4, "carb": 4.0}, {"name": "芥蓝", "category": "配菜", "kcal": 22, "protein": 2.8, "fat": 0.3, "carb": 3.2}, {"name": "芦笋", "category": "配菜", "kcal": 20, "protein": 2.2, "fat": 0.2, "carb": 3.0}, {"name": "豆芽", "category": "配菜", "kcal": 30, "protein": 3.0, "fat": 0.3, "carb": 6.0}, {"name": "豆苗", "category": "配菜", "kcal": 25, "protein": 2.6, "fat": 0.3, "carb": 3.5}, {"name": "黄瓜", "category": "配菜", "kcal": 15, "protein": 0.6, "fat": 0.2, "carb": 3.6}, {"name": "冬瓜", "category": "配菜", "kcal": 12, "protein": 0.4, "fat": 0.2, "carb": 2.6}, {"name": "南瓜", "category": "配菜", "kcal": 26, "protein": 1.0, "fat": 0.1, "carb": 6.0}, {"name": "丝瓜", "category": "配菜", "kcal": 21, "protein": 1.0, "fat": 0.3, "carb": 4.0}, {"name": "苦瓜", "category": "配菜", "kcal": 19, "protein": 1.0, "fat": 0.2, "carb": 4.0}, {"name": "西葫芦", "category": "配菜", "kcal": 19, "protein": 0.8, "fat": 0.2, "carb": 3.8}, {"name": "番茄", "category": "配菜", "kcal": 18, "protein": 0.9, "fat": 0.2, "carb": 3.9}, {"name": "茄子", "category": "配菜", "kcal": 25, "protein": 1.1, "fat": 0.2, "carb": 5.0}, {"name": "辣椒", "category": "配菜", "kcal": 28, "protein": 1.4, "fat": 0.3, "carb": 5.0}, {"name": "彩椒", "category": "配菜", "kcal": 26, "protein": 1.3, "fat": 0.2, "carb": 4.8}, {"name": "香菇", "category": "配菜", "kcal": 26, "protein": 1.8, "fat": 0.3, "carb": 5.2}, {"name": "金针菇", "category": "配菜", "kcal": 32, "protein": 2.4, "fat": 0.4, "carb": 6.0}, {"name": "杏鲍菇", "category": "配菜", "kcal": 31, "protein": 1.3, "fat": 0.5, "carb": 6.0}, {"name": "木耳", "category": "配菜", "kcal": 25, "protein": 1.5, "fat": 0.2, "carb": 6.0}, {"name": "银耳", "category": "配菜", "kcal": 20, "protein": 0.8, "fat": 0.1, "carb": 4.5}, {"name": "平菇", "category": "配菜", "kcal": 20, "protein": 1.9, "fat": 0.3, "carb": 3.0}, {"name": "草菇", "category": "配菜", "kcal": 23, "protein": 2.5, "fat": 0.3, "carb": 3.8}, {"name": "口蘑", "category": "配菜", "kcal": 26, "protein": 3.0, "fat": 0.3, "carb": 3.5}, {"name": "海鲜菇", "category": "配菜", "kcal": 28, "protein": 2.5, "fat": 0.4, "carb": 4.5}, {"name": "豆腐", "category": "配菜", "kcal": 80, "protein": 7.0, "fat": 5.0, "carb": 2.0}, {"name": "嫩豆腐", "category": "配菜", "kcal": 60, "protein": 5.5, "fat": 3.5, "carb": 1.6}, {"name": "老豆腐", "category": "配菜", "kcal": 90, "protein": 8.0, "fat": 5.5, "carb": 2.2}, {"name": "冻豆腐", "category": "配菜", "kcal": 75, "protein": 6.5, "fat": 4.0, "carb": 2.0}, {"name": "油豆腐", "category": "配菜", "kcal": 240, "protein": 17.0, "fat": 19.0, "carb": 5.0}, {"name": "豆腐皮", "category": "配菜", "kcal": 230, "protein": 22.0, "fat": 15.0, "carb": 6.0}, {"name": "千张", "category": "配菜", "kcal": 200, "protein": 20.0, "fat": 12.0, "carb": 3.0}, {"name": "腐竹", "category": "配菜", "kcal": 430, "protein": 44.0, "fat": 22.0, "carb": 12.0}, {"name": "豆干", "category": "配菜", "kcal": 150, "protein": 16.0, "fat": 8.0, "carb": 4.0}, {"name": "毛豆", "category": "配菜", "kcal": 120, "protein": 11.0, "fat": 5.0, "carb": 9.0}, {"name": "豌豆", "category": "配菜", "kcal": 80, "protein": 5.0, "fat": 0.5, "carb": 14.0}, {"name": "蚕豆", "category": "配菜", "kcal": 90, "protein": 7.0, "fat": 0.8, "carb": 15.0}, {"name": "扁豆", "category": "配菜", "kcal": 37, "protein": 2.0, "fat": 0.2, "carb": 7.0}, {"name": "四季豆", "category": "配菜", "kcal": 30, "protein": 2.0, "fat": 0.2, "carb": 6.0}, {"name": "荷兰豆", "category": "配菜", "kcal": 32, "protein": 2.5, "fat": 0.2, "carb": 6.5}, {"name": "凉拌黄瓜", "category": "配菜", "kcal": 16, "protein": 0.7, "fat": 0.2, "carb": 3.7}, {"name": "凉拌番茄", "category": "配菜", "kcal": 19, "protein": 1.0, "fat": 0.2, "carb": 4.0}, {"name": "凉拌木耳", "category": "配菜", "kcal": 26, "protein": 1.6, "fat": 0.2, "carb": 6.2}, {"name": "凉拌海带丝", "category": "配菜", "kcal": 13, "protein": 1.5, "fat": 0.2, "carb": 2.5}, {"name": "凉拌豆腐丝", "category": "配菜", "kcal": 180, "protein": 18.0, "fat": 9.0, "carb": 5.0}, {"name": "凉拌豆芽", "category": "配菜", "kcal": 31, "protein": 3.1, "fat": 0.3, "carb": 6.1}, {"name": "凉拌菠菜", "category": "配菜", "kcal": 24, "protein": 3.0, "fat": 0.4, "carb": 3.7}, {"name": "凉拌芹菜", "category": "配菜", "kcal": 17, "protein": 0.9, "fat": 0.1, "carb": 3.1}, {"name": "凉拌藕片", "category": "配菜", "kcal": 47, "protein": 1.5, "fat": 0.1, "carb": 10.0}, {"name": "凉拌土豆丝", "category": "配菜", "kcal": 57, "protein": 1.5, "fat": 0.1, "carb": 12.0}, {"name": "番茄蛋汤", "category": "配菜", "kcal": 35, "protein": 2.8, "fat": 1.8, "carb": 3.5}, {"name": "紫菜蛋汤", "category": "配菜", "kcal": 30, "protein": 2.9, "fat": 1.5, "carb": 2.0}, {"name": "青菜豆腐汤", "category": "配菜", "kcal": 22, "protein": 1.8, "fat": 0.8, "carb": 2.5}, {"name": "冬瓜汤", "category": "配菜", "kcal": 13, "protein": 0.5, "fat": 0.2, "carb": 2.7}, {"name": "丝瓜汤", "category": "配菜", "kcal": 22, "protein": 1.1, "fat": 0.3, "carb": 4.0}, {"name": "菌菇汤", "category": "配菜", "kcal": 25, "protein": 2.2, "fat": 0.3, "carb": 3.0}, {"name": "鸡汤", "category": "配菜", "kcal": 60, "protein": 5.0, "fat": 4.0, "carb": 0.5}, {"name": "排骨汤", "category": "配菜", "kcal": 120, "protein": 8.0, "fat": 9.0, "carb": 0.8}];</script><script>
+const API = '/api/chat';
+let userId = localStorage.getItem('uid') || (()=>{const u='web_'+Date.now();localStorage.setItem('uid',u);return u})();
+let userData = JSON.parse(localStorage.getItem('userData')||'null') || {};
+let chatHistory = JSON.parse(localStorage.getItem('chatHistory')||'[]');
+let planCompleted = JSON.parse(localStorage.getItem('planCompleted')||'{}');
+let planEdits = JSON.parse(localStorage.getItem('planEdits')||'{}');
+let credits = parseInt(localStorage.getItem('credits')||'200');
+let signedDate = localStorage.getItem('signedDate')||'';
+let weeklyPlan = JSON.parse(localStorage.getItem('weeklyPlan')||'null');
+let lastMsg = '';
+
+// ========== DATA (inline) ==========
+let exercises=EX_DATA,foods=FD_DATA;
+initPages();
+
+function initPages(){
+ buildFoodLib();
+ buildExerciseLib();
+ buildProfile();
+ if(weeklyPlan) buildWeeklyPlan();
+}
+
+// ========== TAB ==========
+function switchTab(name){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+ document.getElementById('page-'+name).classList.add('active');
+ document.querySelectorAll('.tab-item').forEach((t,i)=>{
+  if(['chat','wheel','meal','exercise','plan','profile'][i]===name) t.classList.add('active');
+ });
+ if(name==='plan') loadWeeklyPlan();
+ if(name==='wheel') spinWheel();
+}
+
+// ========== CHAT ==========
+function addMsg(role,content,type,extra){
+ const d=document.createElement('div');d.className='msg '+role;
+ const av=document.createElement('div');av.className='av '+role;av.textContent=role==='ai'?'🤖':'我';
+ const b=document.createElement('div');
+ if(type==='workout'&&extra){
+  b.className='bub card';b.innerHTML='<div class="card-tt">📋 '+extra.place+'训练计划</div>';
+  (extra.schedule||[]).forEach(d=>{
+   if(d.rest||d.focus==='休息'){b.innerHTML+=`<div class="card-row">${d.label||'Day'+d.day} · 休息日</div>`;return}
+   b.innerHTML+=`<div class="card-row">${d.label||'Day'+d.day} ${d.focus}</div>`;
+   (d.exercises||[]).forEach(ex=>{b.innerHTML+=`<div class="card-row" style="padding-left:12px;font-size:12px">· ${ex.name} ${ex.sets}组×${ex.reps}次</div>`});
+  });
+ }else if(type==='meal'&&extra){
+  b.className='bub card';b.innerHTML='<div class="card-tt">🍽️ '+extra.date+'</div>';
+  b.innerHTML+=`<div class="card-row">主食: <span class="card-v">${extra.meal?.main_staple||''}</span></div>`;
+  (extra.meal?.dishes||[]).forEach(d=>{b.innerHTML+=`<div class="card-row">${d.name} <span class="card-v">${d.grams}g ${d.kcal}kcal</span></div>`});
+  b.innerHTML+=`<div class="card-row">热量:<span class="card-v">${extra.meal?.total_kcal||''}kcal</span> 蛋白:<span class="card-v">${extra.meal?.protein_g||''}g</span></div>`;
+ }else if(type==='metrics'){
+  b.className='bub card';b.innerHTML='<div class="card-tt">📊 身体数据</div>';
+  const labels={bmi:'BMI',bmr:'基础代谢(kcal)',tdee:'每日消耗(kcal)',recommended_intake:'推荐摄入(kcal)',protein_g:'蛋白质(g)',fat_g:'脂肪(g)',carb_g:'碳水(g)'};
+  if(extra.metrics){for(const[k,v]of Object.entries(extra.metrics))b.innerHTML+=`<div class="card-row">${labels[k]||k}: <span class="card-v">${v}</span></div>`}
+ }else{
+  b.className='bub '+role;b.textContent=content||'';
+ }
+ d.appendChild(av);d.appendChild(b);document.getElementById('chatList').appendChild(d);
+ const cl=document.getElementById('chatList');cl.scrollTop=cl.scrollHeight;
+ chatHistory.push({role,content,type,extra});localStorage.setItem('chatHistory',JSON.stringify(chatHistory.slice(-50)));
+}
+
+function restoreChat(){
+ const cl=document.getElementById('chatList');cl.innerHTML='';
+ chatHistory.forEach(h=>addMsg(h.role,h.content,h.type,h.extra));
+ if(chatHistory.length===0){
+  cl.innerHTML='<div class="onboard-form" id="onboardForm"><div style="text-align:center;padding:20px 0"><h3>📋 填写身体数据</h3><p style="color:#888;font-size:13px">我来为你定制专属计划</p></div><div class="form-row"><span class="form-label">身高</span><select id="obH"><option value="155">155 cm</option><option value="160">160 cm</option><option value="165" selected>165 cm</option><option value="170">170 cm</option><option value="175">175 cm</option><option value="180">180 cm</option><option value="185">185 cm</option><option value="190">190 cm</option></select><span class="form-unit">cm</span></div><div class="form-row"><span class="form-label">体重</span><select id="obW"><option value="50">50 kg</option><option value="55">55 kg</option><option value="60">60 kg</option><option value="65" selected>65 kg</option><option value="70">70 kg</option><option value="75">75 kg</option><option value="80">80 kg</option><option value="85">85 kg</option><option value="90">90 kg</option><option value="100">100 kg</option></select><span class="form-unit">kg</span></div><div class="form-row"><span class="form-label">性别</span><div class="form-seg"><span class="seg active" id="obGM" onclick="setSeg(\'obGM\',\'obGF\',\'male\')">男</span><span class="seg" id="obGF" onclick="setSeg(\'obGF\',\'obGM\',\'female\')">女</span></div></div><div class="form-row"><span class="form-label">年龄</span><select id="obA"><option value="18">18 岁</option><option value="22">22 岁</option><option value="25" selected>25 岁</option><option value="30">30 岁</option><option value="35">35 岁</option><option value="40">40 岁</option><option value="45">45 岁</option></select><span class="form-unit">岁</span></div><div class="form-row"><span class="form-label">目标</span><div class="form-seg"><span class="seg active" id="obFL" onclick="setSeg(\'obFL\',\'obMG,obSP,obMT\',\'fat_loss\')">减脂</span><span class="seg" id="obMG" onclick="setSeg(\'obMG\',\'obFL,obSP,obMT\',\'muscle_gain\')">增肌</span><span class="seg" id="obSP" onclick="setSeg(\'obSP\',\'obFL,obMG,obMT\',\'shape\')">塑形</span><span class="seg" id="obMT" onclick="setSeg(\'obMT\',\'obFL,obMG,obSP\',\'maintain\')">维持</span></div></div><div class="form-row"><span class="form-label">场所</span><div class="form-seg"><span class="seg active" id="obHM" onclick="setSeg(\'obHM\',\'obGY\',\'home\')">🏠 居家</span><span class="seg" id="obGY" onclick="setSeg(\'obGY\',\'obHM\',\'gym\')">🏋️ 健身房</span></div></div><button class="form-submit" onclick="submitOnboard()">确认提交 ✓</button></div>';
+ }
+}
+
+function setSeg(activeId, otherIds, val){
+ document.getElementById(activeId).classList.add('active');
+ otherIds.split(',').forEach(id=>document.getElementById(id).classList.remove('active'));
+ document.getElementById(activeId).setAttribute('data-val',val);
+}
+
+function submitOnboard(){
+ const h=document.getElementById('obH')?.value||'170';
+ const w=document.getElementById('obW')?.value||'70';
+ const a=document.getElementById('obA')?.value||'25';
+ const g=document.querySelector('#obGM.active')?document.querySelector('#obGM.active').getAttribute('data-val')||'male':document.querySelector('#obGF.active')?.getAttribute('data-val')||'female';
+ const goal=document.querySelector('[id^=obF].active,#obFL.active,#obMG.active,#obSP.active,#obMT.active')?.getAttribute('data-val')||'fat_loss';
+ const place=document.querySelector('#obHM.active')?.getAttribute('data-val')||document.querySelector('#obGY.active')?.getAttribute('data-val')||'home';
+ const msg=`${h} ${w} ${g==='female'?'女':'男'} ${a} ${({fat_loss:'减脂',muscle_gain:'增肌',shape:'塑形',maintain:'维持'})[goal]} ${place==='home'?'居家':'健身房'}`;
+ document.getElementById('onboardForm')?.remove();
+ send(msg);
+}
+
+async function send(text){
+ const msg=text||document.getElementById('chatInput').value.trim();
+ if(!msg)return;
+ document.getElementById('chatInput').value='';
+ addMsg('user',msg);
+ lastMsg=msg;
+ const typing=document.createElement('div');typing.className='msg ai';
+ typing.innerHTML='<div class="av ai">🤖</div><div class="bub ai" style="color:#aaa">思考中...</div>';
+ typing.id='typing';document.getElementById('chatList').appendChild(typing);
+ try{
+  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:userId,message:msg})});
+  const d=await r.json();
+  document.getElementById('typing')?.remove();
+  if(d.blocked){addMsg("ai","你好，我是健身饮食助手，不提供医疗建议。");return}
+  credits=d.credits||credits;localStorage.setItem("credits",credits);
+  if(d.workout_plan){weeklyPlan=d.workout_plan;localStorage.setItem("weeklyPlan",JSON.stringify(weeklyPlan));buildWeeklyPlan()}
+  if(d.metrics){userData={...userData,metrics:d.metrics};localStorage.setItem("userData",JSON.stringify(userData))}
+  if(d.content){addMsg("ai",d.content);document.getElementById("quickBar").style.display="flex"}
+  else if(d.message){addMsg("ai",d.message)}
+  else{addMsg("ai","操作完成")}
+ }catch(e){document.getElementById('typing')?.remove();addMsg('ai','抱歉，服务暂时不可用');}
+}
+
+// ========== FOOD LIB ==========
+function buildFoodLib(cat='全部'){
+ const div=document.getElementById('foodLib');
+ let html='<div class="filter-row">';
+ ['全部','主食','主菜','配菜'].forEach(c=>{html+=`<div class="ftag${cat===c?' active':''}" onclick="buildFoodLib('${c}')">${c}</div>`});
+ html+='</div>';
+ const list=cat==='全部'?foods:foods.filter(f=>f.category===cat);
+ list.forEach(f=>{
+  const ccn=f.category==='主食'?'staple':f.category==='主菜'?'main':'side';
+  html+=`<div class="grid-item" onclick="showFoodDetail('${f.name}')"><div><div class="gi-name">${f.name}</div><div class="gi-sub">每100g: ${f.kcal}kcal | 蛋白${f.protein}g | 脂肪${f.fat}g | 碳水${f.carb}g</div></div><div class="gi-tag ${ccn}">${f.category}</div></div>`;
+ });
+ div.innerHTML=html;
+}
+function showFoodDetail(name){
+ const f=foods.find(x=>x.name===name);if(!f)return;
+ const total=f.protein+f.fat+f.carb;
+ document.getElementById('modalContent').innerHTML=`
+  <span class="modal-close" onclick="closeModal()">×</span>
+  <div class="m-title">${f.name}</div>
+  <div style="margin-bottom:16px"><span class="gi-tag ${f.category==='主食'?'staple':f.category==='主菜'?'main':'side'}">${f.category}</span></div>
+  <div class="m-desc">每100g营养:</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+   <div style="text-align:center;padding:16px;background:#f9f9f9;border-radius:10px"><span style="font-size:28px;font-weight:700;color:#00d4aa">${f.kcal}</span><br><span style="font-size:12px;color:#999">热量 kcal</span></div>
+   <div style="text-align:center;padding:16px;background:#f9f9f9;border-radius:10px"><span style="font-size:28px;font-weight:700;color:#3498db">${f.protein}g</span><br><span style="font-size:12px;color:#999">蛋白质</span></div>
+   <div style="text-align:center;padding:16px;background:#f9f9f9;border-radius:10px"><span style="font-size:28px;font-weight:700;color:#f39c12">${f.fat}g</span><br><span style="font-size:12px;color:#999">脂肪</span></div>
+   <div style="text-align:center;padding:16px;background:#f9f9f9;border-radius:10px"><span style="font-size:28px;font-weight:700;color:#e74c3c">${f.carb}g</span><br><span style="font-size:12px;color:#999">碳水</span></div>
+  </div>`;
+ document.getElementById('modal').classList.add('show');
+}
+
+// ========== EXERCISE LIB ==========
+function buildExerciseLib(muscle='全部'){
+ const div=document.getElementById('exerciseLib');
+ const muscles=['全部',...new Set(exercises.map(e=>e.muscle)).values()];
+ let html='<div class="filter-row">';
+ muscles.forEach(m=>{html+=`<div class="ftag${muscle===m?' active':''}" onclick="buildExerciseLib('${m}')">${m}</div>`});
+ html+='</div>';
+ const list=muscle==='全部'?exercises:exercises.filter(e=>e.muscle===muscle);
+ list.forEach(e=>{html+=`<div class="grid-item" onclick="showExDetail('${e.name}')"><div><div class="gi-name">${e.name}${e.warning?' ⚠️':''}</div><div class="gi-sub">${e.muscle} · ${e.level} · ${e.place==='gym'?'健身房':'居家'}</div></div><span style="color:#ccc">›</span></div>`});
+ div.innerHTML=html;
+}
+function showExDetail(name){
+ const e=exercises.find(x=>x.name===name);if(!e)return;
+ document.getElementById('modalContent').innerHTML=`
+  <span class="modal-close" onclick="closeModal()">×</span>
+  <div class="m-title">${e.name}</div>
+  <div style="margin-bottom:16px">
+   <span class="gi-tag">${e.muscle}</span>
+   <span style="font-size:12px;color:#666;margin-left:8px">${e.level} · ${e.place==='gym'?'健身房':'居家'}</span>
+  </div>
+  ${e.warning?`<div class="m-warn">⚠️ ${e.warning}，请注意安全</div>`:''}
+  <div class="m-desc">${e.desc}</div>`;
+ document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+
+// ========== WEEKLY PLAN ==========
+function loadWeeklyPlan(){
+ const saved=localStorage.getItem('weeklyPlan');
+ if(saved)try{weeklyPlan=JSON.parse(saved)}catch(e){}
+ if(weeklyPlan)buildWeeklyPlan();
+}
+function buildWeeklyPlan(){
+ const div=document.getElementById('weeklyPlan');if(!weeklyPlan?.schedule)return;
+ const start=weeklyPlan.startDate||new Date().toISOString().slice(0,10);
+ let html='<div style="margin-bottom:16px;font-weight:600;font-size:16px">训练计划</div>';
+ (weeklyPlan.schedule||[]).forEach((d,i)=>{
+  const sd=new Date(start);sd.setDate(sd.getDate()+i);const ds=`${sd.getMonth()+1}/${sd.getDate()}`;
+  if(d.rest||d.focus==='休息'){html+=`<div class="wp-day"><div class="wp-header"><span class="wp-label">${d.label||'Day'+(i+1)}</span><span class="wp-date">${ds}</span></div><div style="color:#999;font-size:14px">休息日 💤</div></div>`;return}
+  html+=`<div class="wp-day"><div class="wp-header"><div><span class="wp-label">${d.label||'Day'+(i+1)}</span><span class="wp-date"> ${ds}</span></div><span class="wp-focus">${d.focus}</span></div>`;
+  (d.exercises||[]).forEach((ex,ei)=>{
+   const key=`${start}_${i}_${ei}`;const done=planCompleted[key];
+   const edits=planEdits[key]||{};
+   const s=edits.sets||ex.sets;const r=edits.reps||ex.reps;const w=edits.weight||ex.weight||0;
+   const diff=(planEdits[key]||{}).difficulty||'';
+   html+=`<div class="wp-ex"><div class="wp-check${done?' done':''}" onclick="toggleEx('${key}')">${done?'✓':''}</div>`;
+   html+=`<div class="wp-ex-name${done?' strike':''}">${ex.name}</div>`;
+   html+=`<div class="wp-ex-params">${s}组×${r}次 ${w}kg</div>`;
+   html+=`<button class="wp-btn ez${diff==='easy'?' active':''}" onclick="setDifficulty(${i},${ei},'easy')">简单</button>`;
+   html+=`<button class="wp-btn ok${diff==='ok'?' active':''}" onclick="setDifficulty(${i},${ei},'ok')">适中</button>`;
+   html+=`<button class="wp-btn hd${diff==='hard'?' active':''}" onclick="setDifficulty(${i},${ei},'hard')">困难</button></div>`;
+  });
+  html+='</div>';
+ });
+ div.innerHTML=html;
+}
+function toggleEx(key){
+ planCompleted[key]=!planCompleted[key];
+ localStorage.setItem('planCompleted',JSON.stringify(planCompleted));
+ buildWeeklyPlan();
+}
+
+// ========== PROFILE ==========
+let avatarTap=0,avatarTimer=null;
+function onAvatarTap(){
+ if(avatarTimer)clearTimeout(avatarTimer);
+ avatarTap++;avatarTimer=setTimeout(()=>{avatarTap=0},1500);
+ if(avatarTap>=5){avatarTap=0;clearTimeout(avatarTimer);
+	  showTextModal("数据看板验证","请输入密码","",function(pw){if(pw=="315315zjh"){showDashboard()}else{alert("密码错误")}});
+  if(pw==='315315zjh'){showDashboard()}else{alert('密码错误')}
+ }
+}
+function buildProfile(){
+ const p=userData.profile||{};
+ const m=userData.metrics||{};
+ const td=new Date().toISOString().slice(0,10);
+ let html='<div class="p-header"><div class="p-avatar" onclick="onAvatarTap()">🏋️</div></div>';
+ html+=`<div class="signin-bar" onclick="doSignin()"><span class="icon">${signedDate===td?'✅':'🎁'}</span> ${signedDate===td?'已签到':'签到+20 积分'} · 当前 ${credits} 积分</div>`;
+ html+='<div class="section-title">身体数据</div>';
+ html+=`<div class="p-field" onclick="editField('身高',${p.height_cm||170})"><span class="p-label">身高</span><span class="p-val">${p.height_cm||'--'} cm</span></div>`;
+ html+=`<div class="p-field" onclick="editField('体重',${p.weight_kg||70})"><span class="p-label">体重</span><span class="p-val">${p.weight_kg||'--'} kg</span></div>`;
+ html+=`<div class="p-field" onclick="editField('年龄',${p.age||25})"><span class="p-label">年龄</span><span class="p-val">${p.age||'--'} 岁</span></div>`;
+ html+=`<div class="p-field" onclick="editGoal()"><span class="p-label">目标</span><span class="p-val">${({fat_loss:'减脂',muscle_gain:'增肌',shape:'塑形',maintain:'维持'})[p.fitness_goal]||'--'}</span></div>`;
+ html+=`<div class="p-field" onclick="editPlace()"><span class="p-label">场所</span><span class="p-val">${p.place==='gym'?'🏋️ 健身房':'🏠 居家'}</span></div>`;
+ if(m.bmi)html+=`<div class="p-metrics"><div class="m-chip">BMI <b>${m.bmi}</b></div><div class="m-chip">每日 <b>${m.intake||m.recommended_intake||'--'}</b> kcal</div></div>`;
+ // 体重历史
+ const wh=JSON.parse(localStorage.getItem('weightHistory')||'[]');
+ if(wh.length>0){
+  html+='<div class="section-title">体重记录 (近7次)</div>';
+  wh.slice(-7).reverse().forEach((w,i)=>{
+   const prev=wh[wh.length-1-i-1];
+   const change=prev?((w.weight_kg-prev.weight_kg).toFixed(1)):null;
+   const arrow=change?(change>0?'↑':'↓'):'';
+   html+=`<div style="padding:6px 0;font-size:13px;color:#666">${w.date} · <b>${w.weight_kg}kg</b> ${change?arrow+' '+Math.abs(change)+'kg':''}</div>`
+  })
+ }
+ html+='<div class="section-title">饮食偏好</div>';
+ html+='<div class="tags">'+(p.allergies||[]).map(a=>`<span class="tag avoid">🚫 ${a}</span>`).join('')+'</div>';
+ html+='<button class="p-btn" onclick="editAllergies()">编辑忌口</button>';
+ html+='<div class="tags" style="margin-top:12px">'+(p.likedFoods||[]).map(l=>`<span class="tag like">❤️ ${l}</span>`).join('')+'</div>';
+ html+='<button class="p-btn" onclick="editLiked()">编辑喜欢食材</button>';
+ // 功能按钮
+ html+='<div class="section-title">更多</div>';
+ html+='<button class="p-btn" onclick="showFeedback()">💬 意见反馈</button> ';
+ html+='<button class="p-btn" onclick="clearHistory()">🗑 清除对话记录</button> ';
+ html+='<button class="p-btn" onclick="showPrivacy()">📜 隐私政策</button>';
+ document.getElementById('profilePage').innerHTML=html;
+}
+async function clearHistory(){
+ if(!confirm('确定清除所有对话记录？AI会忘记对话上下文。'))return;
+ chatHistory=[];localStorage.setItem('chatHistory','[]');restoreChat();
+ try{await fetch('/api/memory/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:userId})})}catch(e){}
+ alert('已清除');
+}
+function showFeedback(){
+ showTextModal('意见反馈','请输入您的建议或问题','',function(val){
+  fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:userId,content:val})}).then(()=>alert('感谢反馈!')).catch(()=>alert('提交失败,请稍后重试'));
+ });
+}
+function showPrivacy(){
+ document.getElementById('modalContent').innerHTML='<span class="modal-close" onclick="closeModal()">×</span><div class="m-title">隐私政策</div><div class="m-desc">本应用仅收集您主动填写的身体数据(身高/体重/年龄/性别/健身目标)，用于生成个性化训练计划和饮食建议。<br><br>所有数据存储在本地浏览器和服务器数据库中，不会分享给第三方。<br><br>您可以随时删除数据。如有疑问，请通过意见反馈联系我们。</div>';
+ document.getElementById('modal').classList.add('show');
+}
+async function showDashboard(){
+ try{
+  const r=await fetch('/api/admin/stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:'315315zjh'})});
+  const d=await r.json();
+  if(!d.success){alert(d.message);return}
+  document.getElementById('modalContent').innerHTML='<span class="modal-close" onclick="closeModal()">×</span><div class="m-title">📊 数据看板</div>'
+   +`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">`
+   +`<div style="text-align:center;padding:14px;background:#16213e;border-radius:10px;color:#00d4aa;font-size:24px;font-weight:700">${d.totalUsers||0}<br><span style="font-size:12px;color:#666">用户数</span></div>`
+   +`<div style="text-align:center;padding:14px;background:#16213e;border-radius:10px;color:#00d4aa;font-size:24px;font-weight:700">${d.todaySignin||0}<br><span style="font-size:12px;color:#666">今日签到</span></div>`
+   +`<div style="text-align:center;padding:14px;background:#16213e;border-radius:10px;color:#00d4aa;font-size:24px;font-weight:700">${d.plans||0}<br><span style="font-size:12px;color:#666">计划数</span></div></div>`
+   +`<div style="color:#aaa;font-size:13px">反馈: ${d.feedbacks||0}条 | 记忆用户: ${d.memories||0}人</div>`;
+  document.getElementById('modal').classList.add('show');
+ }catch(e){alert('查询失败')}
+}
+
+// ========== DIFFICULTY ==========
+function setDifficulty(dayIdx,exIdx,level){
+ const key=`${weeklyPlan?.startDate||''}_${dayIdx}_${exIdx}`;
+ const edits=planEdits[key]||{};edits.difficulty=level;planEdits[key]=edits;
+ localStorage.setItem('planEdits',JSON.stringify(planEdits));
+ buildWeeklyPlan();
+}
+
+async function saveProfile(){
+ try{
+  const p=userData.profile||{};
+  await fetch('/api/user/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:userId,...p})});
+ }catch(e){}
+}
+let editFieldCallback=null;
+function showTextModal(title,placeholder,current,callback){
+ document.getElementById('editLabel').textContent=title;
+ const inp=document.getElementById('editInput');
+ inp.type='text';inp.placeholder=placeholder;inp.value=current||'';
+ inp.setAttribute('data-type','text');
+ editFieldCallback=callback;
+ document.getElementById('editModal').classList.add('show');
+}
+function editField(label,cur){
+ document.getElementById('editLabel').textContent=label;
+ const inp=document.getElementById('editInput');
+ inp.type='number';inp.value=cur;inp.setAttribute('data-label',label);inp.setAttribute('data-type','number');
+ document.getElementById('editModal').classList.add('show');
+}
+function submitEdit(){
+ const inp=document.getElementById('editInput');
+ const label=inp.getAttribute('data-label');
+ const val=inp.value;
+ document.getElementById('editModal').classList.remove('show');
+ if(!val)return;
+ // 文本回调
+ if(inp.getAttribute('data-type')==='text'){
+  if(editFieldCallback){editFieldCallback(val);editFieldCallback=null;}
+  return;
+ }
+ // 数字编辑
+ const n=(label==='年龄')?parseInt(val):parseFloat(val);
+ if(isNaN(n)||n<=0)return;
+ if(!userData.profile)userData.profile={};
+ if(label==='身高')userData.profile.height_cm=n;
+ else if(label==='体重')userData.profile.weight_kg=n;
+ else if(label==='年龄')userData.profile.age=n;
+ localStorage.setItem('userData',JSON.stringify(userData));
+ saveProfile();buildProfile();
+}
+function editGoal(){
+ const goals=['fat_loss','muscle_gain','shape','maintain'];
+ const labels=['减脂','增肌','塑形','维持'];
+ const cur=userData.profile?.fitness_goal||'fat_loss';
+ const idx=goals.indexOf(cur);
+ const newIdx=(idx+1)%4;
+ if(!userData.profile)userData.profile={};
+ userData.profile.fitness_goal=goals[newIdx];
+ localStorage.setItem('userData',JSON.stringify(userData));
+ saveProfile();buildProfile();
+}
+async function editPlace(){
+ userData.profile=userData.profile||{};
+ userData.profile.place=userData.profile.place==='gym'?'home':'gym';
+ localStorage.setItem('userData',JSON.stringify(userData));
+ saveProfile();buildProfile();
+}
+function editAllergies(){
+ const cur=(userData.profile?.allergies||[]).join(',');
+ showTextModal('编辑忌口食材','用逗号分隔，如：海鲜,花生',cur,function(val){
+  if(!userData.profile)userData.profile={};
+  userData.profile.allergies=val.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  localStorage.setItem('userData',JSON.stringify(userData));
+  saveProfile();buildProfile();
+ });
+}
+function editLiked(){
+ const cur=(userData.profile?.likedFoods||[]).join(',');
+ showTextModal('编辑喜欢食材','用逗号分隔，如：牛肉,豆腐,番茄',cur,function(val){
+  if(!userData.profile)userData.profile={};
+  userData.profile.likedFoods=val.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  localStorage.setItem('userData',JSON.stringify(userData));
+ });
+}
+async function doSignin(){
+ const td=new Date().toISOString().slice(0,10);
+ if(signedDate===td){alert('今日已签到');return}
+ try{
+  const r=await fetch('/api/user/signin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:userId})});
+  const d=await r.json();
+  if(d.signed){credits=d.credits;signedDate=td;localStorage.setItem('credits',credits);localStorage.setItem('signedDate',signedDate);buildProfile();alert('签到成功! +20 积分')}
+  else{alert(d.message||'已签到')}
+ }catch(e){credits+=20;signedDate=td;localStorage.setItem('credits',credits);localStorage.setItem('signedDate',signedDate);buildProfile();alert('签到成功! +20 积分')}
+}
+async function loadUserFromServer(){
+ try{
+  const r=await fetch(`/api/user?uid=${userId}`);
+  const d=await r.json();
+  if(d.success&&d.profile){userData={profile:d.profile};localStorage.setItem('userData',JSON.stringify(userData));loadCreditsFromServer();buildProfile()}
+  const wr=await fetch(`/api/user/weight?uid=${userId}`);
+  const wd=await wr.json();
+  if(wd.success&&wd.history){localStorage.setItem('weightHistory',JSON.stringify(wd.history));buildProfile()}
+ }catch(e){}
+}
+async function loadCreditsFromServer(){
+ try{
+  const r=await fetch(`/api/user/credits?uid=${userId}`);
+  const d=await r.json();
+  credits=d.credits||200;signedDate=d.signed?new Date().toISOString().slice(0,10):'';
+  localStorage.setItem('credits',credits);localStorage.setItem('signedDate',signedDate);
+ }catch(e){}
+}
+
+// ========== WHEEL ==========
+async function spinWheel(){
+ const div=document.getElementById('wheelCards');
+	 div.innerHTML=`<div style="text-align:center;padding:60px"><div class="wheel-spin"></div><p style="color:#888;margin-top:20px;font-size:14px">AI 正在为你搭配三餐...</p></div>`;
+ try{
+  const d=JSON.parse(localStorage.getItem("userData")||"{}");
+  const p=d.profile||{};
+  if(!p.height_cm){document.getElementById('wheelOverlay')?.remove();div.innerHTML='<div style="text-align:center;padding:40px;color:#888">请先在AI教练录入身体数据</div>';return}
+  const res=await fetch('/api/wheel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:userId})});
+  const r=await res.json();
+  if(!r.success){div.innerHTML='<div style="text-align:center;padding:40px;color:#888">'+r.message+'</div>';return}
+  document.getElementById('wheelOverlay')?.remove();
+  let html='';
+  ['早餐','午餐','晚餐'].forEach((label,i)=>{
+   const m=r.meals[i]||{};
+   html+=`<div class="slot-item"><div class="wheel-meal">${label}</div><div class="wheel-staple">🍚 ${m.main_staple||'--'}</div>`;
+   (m.dishes||[]).forEach(d=>{html+=`<div class="wheel-dish">🥘 ${d.name} ${d.grams}g</div>`});
+   html+=`<div class="wheel-kcal">🔥 ${m.total_kcal||'--'} kcal · 蛋白${m.protein_g||'--'}g</div></div>`;
+  });
+  div.innerHTML=html;
+ }catch(e){div.innerHTML='<div style="text-align:center;padding:40px;color:#888">服务暂不可用</div>'}
+}
+
+// Init
+restoreChat();
+loadUserFromServer();
+if(userData.profile)document.getElementById('quickBar').style.display='flex';
+</script>
+</body>
+</html>
