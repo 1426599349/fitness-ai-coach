@@ -25,7 +25,9 @@ Page({
     const app = getApp();
     const credits = app.globalData.credits || 200;
     if (credits < 10) { wx.showToast({ title: '积分不足', icon: 'none' }); return; }
-    app.globalData.credits = credits - 10;
+    const newCredits = credits - 10;
+    app.globalData.credits = newCredits;
+    wx.setStorageSync('userCredits', newCredits);
 
     const t0 = Date.now();
     this.setData({ showWheel: true, mealDetail0: null, mealDetail1: null, mealDetail2: null });
