@@ -6,7 +6,7 @@
 
   <!-- 积分栏（连击5次解锁自由对话） -->
   <view class="credits-bar">
-    <view class="credits-left">
+    <view class="credits-left" bind:tap="onCreditsTap">
       <text class="credits-icon">⚡</text>
       <text class="credits-num">{{credits}}</text>
       <text class="credits-label">积分</text>
