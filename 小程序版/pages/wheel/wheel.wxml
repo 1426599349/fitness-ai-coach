@@ -73,7 +73,7 @@
         🔄 不满意？重新转（-10积分）
       </button>
     </view>
-    <text class="hint" wx:if="{{!todayUsed}}">每天首次免费，AI 智能搭配三餐</text>
+    <text class="hint" wx:if="{{!todayUsed}}">每次消耗 10 积分，AI 智能搭配三餐</text>
   </view>
 </view>
 

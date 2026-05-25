@@ -435,15 +435,13 @@ async function handleMealWheel(openid, isRetry = false) {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  // 重转消耗10积分
-  if (isRetry) {
-    if (credits < 10) {
-      return { error: `积分不足！（当前 ${credits} 分，需要 10 分）`, credits };
-    }
-    const newCredits = credits - 10;
-    try { await db.collection('user_states').doc(openid).update({ data: { credits: newCredits } }); } catch (e) {}
-    credits = newCredits;
+  // 每次转盘消耗10积分
+  if (credits < 10) {
+    return { error: `积分不足！（当前 ${credits} 分，需要 10 分）`, credits };
   }
+  const newCredits = credits - 10;
+  try { await db.collection('user_states').doc(openid).update({ data: { credits: newCredits } }); } catch (e) {}
+  credits = newCredits;
 
   try {
     const meals = await generateMealsWithAI(userMetrics, profile, allergies);
