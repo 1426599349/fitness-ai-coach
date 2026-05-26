@@ -150,7 +150,7 @@ Page({
 
   sayGreeting() {
     this.addAIMessage(
-      '你好，我是你的智能营养管家 🥗\n\n' +
+      '你好，我是你的营养管家 🥗\n\n' +
       '请填写以下信息，我会为你定制专属计划：',
       C.MSG_TYPE.TEXT
     );

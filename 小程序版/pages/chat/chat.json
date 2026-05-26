@@ -5,5 +5,5 @@
     "workout-card": "../../components/workout-card/workout-card",
     "metrics-card": "../../components/metrics-card/metrics-card"
   },
-  "navigationBarTitleText": "AI营养管家"
+  "navigationBarTitleText": "数据收集"
 }

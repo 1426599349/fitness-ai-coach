@@ -286,7 +286,7 @@ Page({
   onClearHistory() {
     wx.showModal({
       title: '清除对话记录',
-      content: '将清除所有对话记忆和聊天记录，AI会忘记之前的对话上下文。确定继续？',
+      content: '将清除所有对话记忆和聊天记录，系统会忘记之前的对话上下文。确定继续？',
       success: async (res) => {
         if (!res.confirm) return;
 
