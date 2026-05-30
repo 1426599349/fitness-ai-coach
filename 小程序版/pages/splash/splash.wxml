@@ -1,0 +1,24 @@
+<view class="splash" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+  <view class="bg-circle circle1"></view>
+  <view class="bg-circle circle2"></view>
+  <view class="bg-circle circle3"></view>
+
+  <view class="main-content {{fadeOut ? 'fade-out' : ''}}">
+    <view class="logo-area">
+      <text class="logo-text">💪</text>
+    </view>
+    <view class="title-area">
+      <text class="app-name">动作库</text>
+      <text class="tagline">你的专属健身搭档</text>
+    </view>
+  </view>
+
+  <view class="swipe-hint {{fadeOut ? 'fade-out' : ''}}">
+    <text class="swipe-text">上划进入</text>
+    <view class="arrow-wrap">
+      <view class="arrow arrow1">›</view>
+      <view class="arrow arrow2">›</view>
+      <view class="arrow arrow3">›</view>
+    </view>
+  </view>
+</view>
