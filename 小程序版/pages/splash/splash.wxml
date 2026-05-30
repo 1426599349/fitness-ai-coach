@@ -1,24 +1,36 @@
 <view class="splash" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
-  <view class="bg-circle circle1"></view>
-  <view class="bg-circle circle2"></view>
-  <view class="bg-circle circle3"></view>
+  <!-- 流动粒子 -->
+  <view class="particle p1"></view>
+  <view class="particle p2"></view>
+  <view class="particle p3"></view>
+  <view class="particle p4"></view>
+  <view class="particle p5"></view>
+  <view class="particle p6"></view>
 
+  <!-- 光晕环 -->
+  <view class="glow-ring ring1"></view>
+  <view class="glow-ring ring2"></view>
+  <view class="glow-ring ring3"></view>
+
+  <!-- 主内容 -->
   <view class="main-content {{fadeOut ? 'fade-out' : ''}}">
-    <view class="logo-area">
-      <text class="logo-text">💪</text>
+    <view class="logo-wrap">
+      <view class="logo-ring"></view>
+      <text class="logo-icon">💪</text>
     </view>
+
     <view class="title-area">
       <text class="app-name">动作库</text>
-      <text class="tagline">你的专属健身搭档</text>
+      <view class="divider"></view>
+      <text class="tagline">记录每一次训练 · 见证每一次改变</text>
     </view>
   </view>
 
+  <!-- 底部上划 -->
   <view class="swipe-hint {{fadeOut ? 'fade-out' : ''}}">
-    <text class="swipe-text">上划进入</text>
-    <view class="arrow-wrap">
-      <view class="arrow arrow1">›</view>
-      <view class="arrow arrow2">›</view>
-      <view class="arrow arrow3">›</view>
+    <view class="swipe-circle">
+      <text class="swipe-arrow">↑</text>
     </view>
+    <text class="swipe-text">上划开启</text>
   </view>
 </view>
