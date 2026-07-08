@@ -27,6 +27,9 @@ exports.main = async (event, context) => {
     case 'updateLikedFoods':
       return handleUpdateLikedFoods(openid, event.likedFoods);
 
+    case 'saveIdentity':
+      return handleSaveIdentity(openid, event.nickname, event.avatarUrl);
+
     case 'submitFeedback':
       return handleSubmitFeedback(openid, event.content);
 
@@ -56,6 +59,8 @@ async function handleLogin(openid) {
       profile: res.data.profile || null,
       metrics: res.data.metrics || null,
       credits: res.data.credits || 0,
+      nickname: res.data.nickname || '',
+      avatarUrl: res.data.avatarUrl || '',
     };
   } catch (e) {
     return { openid, isNewUser: true, credits: 200 };
@@ -102,6 +107,8 @@ async function handleGetProfile(openid) {
       credits: res.data.credits || 0,
       weeklyPlan: res.data.weeklyPlan || null,
       weightHistory: weightLogs.data.map(r => ({ weight_kg: r.weight, date: r.date })),
+      nickname: res.data.nickname || '',
+      avatarUrl: res.data.avatarUrl || '',
     };
   } catch (e) {
     return { error: '用户不存在' };
@@ -214,6 +221,22 @@ async function handleSyncCredits(openid, credits) {
     await db.collection('user_states').doc(openid).update({ data: { credits, updatedAt: new Date() } });
   } catch (e) {
     await db.collection('user_states').doc(openid).set({ data: { openid, credits } });
+  }
+  return { success: true };
+}
+
+async function handleSaveIdentity(openid, nickname, avatarUrl) {
+  try {
+    await db.collection('user_states').doc(openid).update({
+      data: { nickname, avatarUrl, updatedAt: new Date() },
+    });
+  } catch (e) {
+    // 用户可能尚未注册，尝试 set
+    try {
+      await db.collection('user_states').doc(openid).set({
+        data: { openid, nickname, avatarUrl, credits: 200, updatedAt: new Date() },
+      });
+    } catch (e2) {}
   }
   return { success: true };
 }

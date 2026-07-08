@@ -13,10 +13,29 @@ App({
       traceUser: true,
     });
 
+    // 恢复本地授权状态
+    this.restoreAuthState();
+    // 云端登录
     this.doLogin();
   },
 
+  /**
+   * 从本地缓存恢复授权状态
+   */
+  restoreAuthState: function () {
+    try {
+      const nickname = wx.getStorageSync('userNickname');
+      const avatarUrl = wx.getStorageSync('userAvatarUrl');
+      if (nickname) {
+        this.globalData.nickname = nickname;
+        this.globalData.avatarUrl = avatarUrl || '';
+        this.globalData.isAuthorized = true;
+      }
+    } catch (e) {}
+  },
+
   doLogin: function () {
+    // 通过云函数获取 openid（云开发自动使用 wx.login code）
     wx.cloud.callFunction({
       name: 'userInit',
       data: { action: 'login' },
@@ -29,6 +48,14 @@ App({
         } else {
           this.globalData.isNewUser = false;
           this.globalData.userProfile = res.result.profile;
+          // 同步云端头像昵称到本地
+          if (res.result.nickname) {
+            this.globalData.nickname = res.result.nickname;
+            this.globalData.avatarUrl = res.result.avatarUrl || '';
+            this.globalData.isAuthorized = true;
+            wx.setStorageSync('userNickname', res.result.nickname);
+            wx.setStorageSync('userAvatarUrl', res.result.avatarUrl || '');
+          }
         }
       },
       fail: (err) => {
@@ -48,5 +75,10 @@ App({
     credits: 200,
     conversationState: 'greeting',
     adUnitId: '', // 激励视频广告位ID，申请后填入。留空则用模拟模式
+
+    // —— 用户身份 ——
+    isAuthorized: false,   // 是否已完成授权（选头像+昵称）
+    nickname: '',           // 微信昵称
+    avatarUrl: '',          // 头像云存储 fileID
   },
 });

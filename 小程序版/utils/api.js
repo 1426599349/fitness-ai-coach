@@ -3,6 +3,18 @@
  */
 const auth = require('./auth.js');
 
+// ================================================================
+// 深夜休息时段风控
+// ================================================================
+const QUIET_START = 23;
+const QUIET_END = 7;
+const QUIET_MSG = '🌙 夜色已深，该休息啦～\n\n充足的睡眠是肌肉恢复和脂肪代谢的黄金时间，比多练一小时更重要。\n\n先好好睡觉吧，天亮后我随时为你服务 💤';
+
+function isQuietHours() {
+  const hour = new Date().getHours();
+  return hour >= QUIET_START || hour < QUIET_END;
+}
+
 // 本地模拟数据
 const LOCAL_METRICS = {
   bmi: 26.0, bmr: 1678, tdee: 2600, recommended_intake: 2200,
@@ -158,6 +170,13 @@ async function rewardAd() {
 
 function localAiResponse(message) {
   const msg = message.trim();
+
+  // 深夜休息时段风控
+  if (isQuietHours()) {
+    const credits = getLocalCredits();
+    return { type: 'text', content: QUIET_MSG, planUpdated: false, credits };
+  }
+
   const history = getLocalHistory();
   const app = getApp();
   const profile = (app && app.globalData && app.globalData.userProfile) ? app.globalData.userProfile : null;
@@ -370,6 +389,10 @@ async function getDailyMeals(isRetry = false) {
     const result = await callCloudFunction('aiChat', { action: 'meal_wheel', isRetry });
     return result;
   } catch (err) {
+    // 深夜休息时段风控
+    if (isQuietHours()) {
+      return { error: QUIET_MSG };
+    }
     // 本地兜底——检查是否有用户数据
     const app = getApp();
     const profile = (app && app.globalData && app.globalData.userProfile) ? app.globalData.userProfile : null;

@@ -1,13 +1,33 @@
 <scroll-view class="profile-page" scroll-y enhanced show-scrollbar="{{false}}">
   <view class="profile-header">
-    <view class="avatar-large" bind:tap="onAvatarTap">
-      <text class="avatar-emoji">🏋️</text>
-    </view>
+    <!-- 头像：点击选头像 -->
+    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{avatarUrl}}" class="avatar-img" src="{{avatarUrl}}" mode="aspectFill" />
+      <text wx:else class="avatar-emoji">🏋️</text>
+      <view class="avatar-edit-hint">
+        <text>📷</text>
+      </view>
+    </button>
     <view class="user-info">
-      <text class="user-name" wx:if="{{profile}}">健身爱好者</text>
-      <text class="user-name" wx:else>未设置档案</text>
-      <text class="user-desc" wx:if="{{profile}}">点击下方数据项可编辑</text>
+      <input
+        class="nickname-input"
+        type="nickname"
+        placeholder="点击设置昵称"
+        placeholder-class="nickname-placeholder"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+        bindblur="onNicknameBlur"
+        maxlength="20"
+      />
+      <!-- 隐藏入口：连击昵称10次进入数据看板 -->
+      <text class="user-desc" bind:tap="onNameTap" wx:if="{{profile}}">点击下方数据项可编辑</text>
+      <text class="user-desc" wx:else>录入身体数据后解锁全部功能</text>
     </view>
+  </view>
+
+  <!-- 保存身份按钮 -->
+  <view class="save-identity-bar" wx:if="{{dirtyIdentity}}">
+    <button class="save-identity-btn" bind:tap="onSaveIdentity">保存头像与昵称</button>
   </view>
 
   <view class="section" wx:if="{{profile}}">

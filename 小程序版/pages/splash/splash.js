@@ -25,6 +25,7 @@ Page({
     this._entered = true;
     this.setData({ fadeOut: true });
     wx.setStorageSync('splashShown', true);
+
     setTimeout(() => {
       wx.switchTab({ url: '/pages/chat/chat' });
     }, 350);

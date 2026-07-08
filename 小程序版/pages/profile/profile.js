@@ -8,8 +8,8 @@ const GOAL_MAP = { fat_loss: '减脂', muscle_gain: '增肌', shape: '塑形', m
 const GOAL_REVERSE = { '减脂': 'fat_loss', '增肌': 'muscle_gain', '塑形': 'shape', '维持': 'maintain' };
 
 const ADMIN_PASSWORD = '315315zjh';
-let avatarTapCount = 0;
-let avatarTapTimer = null;
+let nameTapCount = 0;
+let nameTapTimer = null;
 
 Page({
   data: {
@@ -17,10 +17,142 @@ Page({
     metrics: null,
     weightHistory: [],
     goalLabel: '',
+    nickname: '',
+    avatarUrl: '',
+    isAuthorized: false,
+    tempAvatarUrl: '',   // 用户新选的头像临时路径
+    dirtyIdentity: false, // 头像或昵称有未保存的修改
   },
 
   onShow() {
     this.loadProfile();
+    this.loadIdentity();
+  },
+
+  loadIdentity() {
+    const app = getApp();
+    const nickname = app.globalData.nickname || wx.getStorageSync('userNickname') || '';
+    const avatarUrl = app.globalData.avatarUrl || wx.getStorageSync('userAvatarUrl') || '';
+    this.setData({
+      nickname,
+      avatarUrl,
+      tempAvatarUrl: avatarUrl,
+      isAuthorized: app.globalData.isAuthorized || !!nickname,
+      dirtyIdentity: false,
+    });
+  },
+
+  // —— 头像选择 ——
+  onChooseAvatar(e) {
+    const tempUrl = e.detail.avatarUrl;
+    this.setData({
+      tempAvatarUrl: tempUrl,
+      avatarUrl: tempUrl, // 页面即时预览
+      dirtyIdentity: true,
+    });
+  },
+
+  // —— 昵称输入 ——
+  onNicknameInput(e) {
+    this.setData({
+      nickname: e.detail.value,
+      dirtyIdentity: true,
+    });
+  },
+
+  onNicknameBlur(e) {
+    this.setData({ nickname: e.detail.value });
+  },
+
+  // —— 保存头像与昵称 ——
+  async onSaveIdentity() {
+    const nickname = (this.data.nickname || '').trim() || '健身爱好者';
+    const app = getApp();
+
+    this.setData({ nickname });
+
+    wx.showLoading({ title: '保存中...', mask: true });
+
+    let finalAvatarUrl = this.data.tempAvatarUrl || '';
+
+    // 新选的头像先上传到云存储
+    if (this.data.tempAvatarUrl && this.data.tempAvatarUrl !== (wx.getStorageSync('userAvatarUrl') || '')) {
+      // 是临时路径（非 cloud:// 开头的 fileID），需要上传
+      if (!this.data.tempAvatarUrl.startsWith('cloud://')) {
+        try {
+          finalAvatarUrl = await this.uploadAvatar(this.data.tempAvatarUrl);
+        } catch (e) {
+          console.warn('头像上传失败，跳过云端存储', e);
+          finalAvatarUrl = this.data.tempAvatarUrl; // 回退用临时路径
+        }
+      }
+    }
+
+    // 写入本地
+    wx.setStorageSync('userNickname', nickname);
+    wx.setStorageSync('userAvatarUrl', finalAvatarUrl);
+
+    // 写入 globalData
+    app.globalData.nickname = nickname;
+    app.globalData.avatarUrl = finalAvatarUrl;
+    app.globalData.isAuthorized = true;
+
+    // 云端同步
+    try {
+      await wx.cloud.callFunction({
+        name: 'userInit',
+        data: { action: 'saveIdentity', nickname, avatarUrl: finalAvatarUrl },
+      });
+    } catch (e) {
+      console.warn('云端同步身份失败（离线模式无影响）', e);
+    }
+
+    wx.hideLoading();
+    this.setData({
+      avatarUrl: finalAvatarUrl,
+      tempAvatarUrl: finalAvatarUrl,
+      dirtyIdentity: false,
+      isAuthorized: true,
+    });
+    wx.showToast({ title: '已保存', icon: 'success' });
+  },
+
+  // 上传头像到云存储
+  uploadAvatar(tempPath) {
+    return new Promise((resolve, reject) => {
+      const app = getApp();
+      const cloudPath = `avatars/${app.globalData.openid || 'unknown'}_${Date.now()}.png`;
+      wx.cloud.uploadFile({
+        cloudPath,
+        filePath: tempPath,
+        success: (res) => resolve(res.fileID),
+        fail: reject,
+      });
+    });
+  },
+
+  // —— 连击昵称10次进入数据看板 ——
+  onNameTap() {
+    if (nameTapTimer) clearTimeout(nameTapTimer);
+    nameTapCount++;
+    nameTapTimer = setTimeout(() => { nameTapCount = 0; }, 1500);
+
+    if (nameTapCount >= 10) {
+      nameTapCount = 0;
+      clearTimeout(nameTapTimer);
+      wx.showModal({
+        title: '数据看板验证',
+        editable: true,
+        placeholderText: '请输入访问密码',
+        success: (res) => {
+          if (res.confirm && res.content === ADMIN_PASSWORD) {
+            wx.navigateTo({ url: '/pages/admin-analytics/admin-analytics' });
+          } else if (res.confirm) {
+            wx.showToast({ title: '密码错误', icon: 'none' });
+          }
+        },
+      });
+    }
   },
 
   loadProfile() {
@@ -220,29 +352,6 @@ Page({
         }
       },
     });
-  },
-
-  onAvatarTap() {
-    if (avatarTapTimer) clearTimeout(avatarTapTimer);
-    avatarTapCount++;
-    avatarTapTimer = setTimeout(() => { avatarTapCount = 0; }, 1500);
-
-    if (avatarTapCount >= 10) {
-      avatarTapCount = 0;
-      clearTimeout(avatarTapTimer);
-      wx.showModal({
-        title: '数据看板验证',
-        editable: true,
-        placeholderText: '请输入访问密码',
-        success: (res) => {
-          if (res.confirm && res.content === ADMIN_PASSWORD) {
-            wx.navigateTo({ url: '/pages/admin-analytics/admin-analytics' });
-          } else if (res.confirm) {
-            wx.showToast({ title: '密码错误', icon: 'none' });
-          }
-        },
-      });
-    }
   },
 
   onGoWeeklyPlan() {

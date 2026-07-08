@@ -1,0 +1,72 @@
+<!--
+  授权登录页
+  微信合规方案：chooseAvatar + type="nickname"
+-->
+<view class="login-page">
+  <!-- 品牌区 -->
+  <view class="brand-area">
+    <view class="logo-ring">
+      <text class="logo-icon">💪</text>
+    </view>
+    <text class="app-name">动作库</text>
+    <text class="app-desc">你的专属 AI 健身饮食管家</text>
+  </view>
+
+  <!-- 授权卡片 -->
+  <view class="auth-card">
+    <text class="card-title">完善你的身份</text>
+    <text class="card-sub">选择一个头像和昵称，让教练认识你</text>
+
+    <!-- 头像选择 -->
+    <view class="avatar-section">
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+      >
+        <image
+          wx:if="{{hasAvatar}}"
+          class="avatar-preview"
+          src="{{avatarUrl}}"
+          mode="aspectFill"
+        />
+        <text wx:else class="avatar-placeholder">🏋️</text>
+        <text class="avatar-tip">点击选择头像</text>
+      </button>
+    </view>
+
+    <!-- 昵称输入 -->
+    <view class="nickname-section">
+      <text class="field-label">昵称</text>
+      <input
+        class="nickname-input"
+        type="nickname"
+        placeholder="请输入昵称（或点此自动填入微信昵称）"
+        placeholder-class="nickname-placeholder"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+        bindblur="onNicknameBlur"
+        maxlength="20"
+      />
+    </view>
+  </view>
+
+  <!-- 隐私说明 -->
+  <view class="privacy-notice">
+    <text class="privacy-icon">🔒</text>
+    <text class="privacy-text">
+      我们仅获取你的头像和昵称用于个人化展示。你的健康数据（身高、体重等）仅存储在云端并严格保密。登录即表示同意
+    </text>
+    <navigator url="/pages/privacy/privacy" class="privacy-link">《隐私政策》</navigator>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-area">
+    <button class="confirm-btn {{submitting ? 'disabled' : ''}}" bindtap="onConfirm" loading="{{submitting}}">
+      授权并开始
+    </button>
+    <view class="skip-link" bindtap="onSkip">
+      <text>暂不设置，直接进入 ></text>
+    </view>
+  </view>
+</view>
