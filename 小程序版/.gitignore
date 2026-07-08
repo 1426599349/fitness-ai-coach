@@ -12,3 +12,6 @@ $RECYCLE.BIN/
 
 # Node.js
 node_modules/
+
+# 小程序图标（一次性上传微信公众平台，无需版本管理）
+小程序图标).png
