@@ -1,11 +1,10 @@
 <view class="splash">
-  <!-- 全屏视频背景（原生组件，层级最高，触摸事件绑在这里） -->
   <video
     class="splash-video"
     src="/images/splash-video.mp4"
-    autoplay="{{true}}"
-    loop="{{true}}"
-    muted="{{true}}"
+    autoplay
+    loop
+    muted
     object-fit="cover"
     show-center-play-btn="{{false}}"
     show-play-btn="{{false}}"
@@ -14,29 +13,17 @@
     bindtouchstart="onTouchStart"
     bindtouchend="onTouchEnd"
   >
-    <!-- cover-view 覆盖层 — 渲染在原生 video 之上 -->
-    <cover-view class="video-overlay"></cover-view>
-
-    <!-- 主内容（cover-view 才能显示在 video 之上） -->
-    <cover-view class="main-content {{fadeOut ? 'fade-out' : ''}}">
-      <cover-view class="logo-wrap">
-        <cover-view class="logo-ring"></cover-view>
-        <cover-view class="logo-icon">💪</cover-view>
+    <cover-view class="cover-mask" wx:if="{{!fadeOut}}">
+      <cover-view class="cover-logo">💪</cover-view>
+      <cover-view class="cover-title">动作库</cover-view>
+      <cover-view class="cover-line"></cover-view>
+      <cover-view class="cover-sub">记录每一次训练 · 见证每一次改变</cover-view>
+      <cover-view class="cover-swipe">
+        <cover-view class="cover-circle">
+          <cover-view class="cover-arrow">↑</cover-view>
+        </cover-view>
+        <cover-view class="cover-swipe-text">上划开启</cover-view>
       </cover-view>
-
-      <cover-view class="title-area">
-        <cover-view class="app-name">动作库</cover-view>
-        <cover-view class="divider"></cover-view>
-        <cover-view class="tagline">记录每一次训练 · 见证每一次改变</cover-view>
-      </cover-view>
-    </cover-view>
-
-    <!-- 底部上划提示 -->
-    <cover-view class="swipe-hint {{fadeOut ? 'fade-out' : ''}}">
-      <cover-view class="swipe-circle">
-        <cover-view class="swipe-arrow">↑</cover-view>
-      </cover-view>
-      <cover-view class="swipe-text">上划开启</cover-view>
     </cover-view>
   </video>
 </view>
