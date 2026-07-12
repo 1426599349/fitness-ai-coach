@@ -1,12 +1,7 @@
 Page({
-  data: { isDevTools: false },
   _startY: 0,
 
   onLoad() {
-    // 开发者工具模拟器用海报图替代视频（视频在模拟器中无法正常播放）
-    const sys = wx.getSystemInfoSync();
-    this.setData({ isDevTools: sys.platform === 'devtools' });
-
     if (wx.getStorageSync('splashShown')) {
       this.enterApp();
     }
