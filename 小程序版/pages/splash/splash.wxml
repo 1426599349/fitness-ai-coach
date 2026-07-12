@@ -13,17 +13,11 @@
     bindtouchstart="onTouchStart"
     bindtouchend="onTouchEnd"
   >
-    <cover-view class="cover-mask" wx:if="{{!fadeOut}}">
-      <cover-view class="cover-logo">💪</cover-view>
-      <cover-view class="cover-title">动作库</cover-view>
-      <cover-view class="cover-line"></cover-view>
-      <cover-view class="cover-sub">记录每一次训练 · 见证每一次改变</cover-view>
-      <cover-view class="cover-swipe">
-        <cover-view class="cover-circle">
-          <cover-view class="cover-arrow">↑</cover-view>
-        </cover-view>
-        <cover-view class="cover-swipe-text">上划开启</cover-view>
+    <cover-view class="cover-bottom">
+      <cover-view class="cover-circle">
+        <cover-view class="cover-arrow">↑</cover-view>
       </cover-view>
+      <cover-view class="cover-swipe-text">上划开启</cover-view>
     </cover-view>
   </video>
 </view>

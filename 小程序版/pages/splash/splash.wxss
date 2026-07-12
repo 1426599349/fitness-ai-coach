@@ -1,75 +1,14 @@
-.splash {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: #0a0a1a;
+.splash { width: 100%; height: 100%; background: #000; }
+.splash-video { width: 100%; height: 100%; }
+.cover-bottom {
+  position: absolute; bottom: 100rpx; left: 0;
+  width: 100%; text-align: center;
 }
-
-.splash-video {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%;
-}
-
-/* === cover-view 只支持基础属性，禁止 animation/opacity/transform/transition === */
-
-.cover-mask {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.35);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.cover-logo {
-  font-size: 90rpx;
-  margin-bottom: 50rpx;
-}
-
-.cover-title {
-  font-size: 56rpx;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 12rpx;
-  margin-bottom: 20rpx;
-}
-
-.cover-line {
-  width: 60rpx;
-  height: 3px;
-  background: #00d4aa;
-  margin-bottom: 16rpx;
-}
-
-.cover-sub {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.cover-swipe {
-  position: absolute;
-  bottom: 100rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .cover-circle {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 50%;
-  border: 2rpx solid rgba(255, 255, 255, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16rpx;
+  width: 80rpx; height: 80rpx; border-radius: 50%;
+  border: 2rpx solid rgba(255,255,255,0.4);
+  margin: 0 auto 16rpx;
+  line-height: 80rpx; text-align: center;
 }
-
-.cover-arrow {
-  font-size: 32rpx;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.cover-swipe-text {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.45);
-}
+.cover-arrow { font-size: 32rpx; color: rgba(255,255,255,0.7); }
+.cover-swipe-text { font-size: 24rpx; color: rgba(255,255,255,0.5); }
