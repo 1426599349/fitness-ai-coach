@@ -1,7 +1,8 @@
+<!-- 真机：视频背景 -->
 <video
+  wx:if="{{!isDevTools}}"
   class="sv"
   src="/images/splash-video.mp4"
-  poster="/images/splash-poster.jpg"
   autoplay
   loop
   muted
@@ -13,3 +14,18 @@
   bindtouchstart="onTouchStart"
   bindtouchend="onTouchEnd"
 />
+
+<!-- 开发者工具模拟器：海报图片背景 -->
+<view wx:else class="sv" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+  <image class="sv-img" src="/images/splash-poster.jpg" mode="aspectFill" />
+  <view class="sv-mask">
+    <text class="sv-logo">💪</text>
+    <text class="sv-title">动作库</text>
+    <view class="sv-line"></view>
+    <text class="sv-sub">记录每一次训练 · 见证每一次改变</text>
+    <view class="sv-swipe-box">
+      <view class="sv-circle"><text class="sv-arrow">↑</text></view>
+      <text class="sv-swipe-text">上划开启</text>
+    </view>
+  </view>
+</view>
