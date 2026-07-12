@@ -1,16 +1,20 @@
 <view class="splash" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
-  <!-- 流动粒子 -->
-  <view class="particle p1"></view>
-  <view class="particle p2"></view>
-  <view class="particle p3"></view>
-  <view class="particle p4"></view>
-  <view class="particle p5"></view>
-  <view class="particle p6"></view>
+  <!-- 全屏视频背景 -->
+  <video
+    class="splash-video"
+    src="{{videoSrc}}"
+    autoplay
+    loop
+    muted
+    object-fit="cover"
+    show-center-play-btn="{{false}}"
+    show-play-btn="{{false}}"
+    enable-progress-gesture="{{false}}"
+    controls="{{false}}"
+  />
 
-  <!-- 光晕环 -->
-  <view class="glow-ring ring1"></view>
-  <view class="glow-ring ring2"></view>
-  <view class="glow-ring ring3"></view>
+  <!-- 半透明遮罩 -->
+  <view class="video-overlay"></view>
 
   <!-- 主内容 -->
   <view class="main-content {{fadeOut ? 'fade-out' : ''}}">

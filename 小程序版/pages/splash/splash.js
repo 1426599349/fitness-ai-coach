@@ -1,8 +1,14 @@
 Page({
-  data: { fadeOut: false },
+  data: {
+    fadeOut: false,
+    videoSrc: '',  // 视频路径：云端优先，本地兜底
+  },
   _startY: 0,
 
   onLoad() {
+    // 优先使用本地压缩版
+    this.setData({ videoSrc: '/images/splash-video.mp4' });
+
     // 如果已经看过封面，直接进入
     if (wx.getStorageSync('splashShown')) {
       this.enterApp();
