@@ -1,23 +1,14 @@
-<view class="splash">
-  <video
-    class="splash-video"
-    src="/images/splash-video.mp4"
-    autoplay
-    loop
-    muted
-    object-fit="cover"
-    show-center-play-btn="{{false}}"
-    show-play-btn="{{false}}"
-    enable-progress-gesture="{{false}}"
-    controls="{{false}}"
-    bindtouchstart="onTouchStart"
-    bindtouchend="onTouchEnd"
-  >
-    <cover-view class="cover-bottom">
-      <cover-view class="cover-circle">
-        <cover-view class="cover-arrow">↑</cover-view>
-      </cover-view>
-      <cover-view class="cover-swipe-text">上划开启</cover-view>
-    </cover-view>
-  </video>
-</view>
+<video
+  class="splash-video"
+  src="/images/splash-video.mp4"
+  autoplay
+  loop
+  muted
+  object-fit="cover"
+  show-center-play-btn="{{false}}"
+  show-play-btn="{{false}}"
+  enable-progress-gesture="{{false}}"
+  controls="{{false}}"
+  bindtouchstart="onTouchStart"
+  bindtouchend="onTouchEnd"
+/>
