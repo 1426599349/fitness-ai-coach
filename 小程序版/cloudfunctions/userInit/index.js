@@ -137,7 +137,7 @@ async function handleUpdateProfile(openid, profile) {
 }
 
 async function handleGetAnalytics() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = chinaDate();
   const _ = db.command;
 
   // 累计用户数（去重）
@@ -179,7 +179,7 @@ async function handleGetAnalytics() {
   // 每日用户新增（最近14天）
   const signupByDay = [];
   for (let i = 13; i >= 0; i--) {
-    const d = new Date();
+    const d = new Date(Date.now() + 8 * 3600 * 1000);
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().slice(0, 10);
     const cnt = await db.collection('analytics')
@@ -201,8 +201,16 @@ async function handleGetAnalytics() {
   };
 }
 
+function chinaDate() {
+  const now = new Date();
+  // 微信云函数服务器在中国(UTC+8)，new Date() 可能是 UTC
+  // 统一加 8 小时偏移确保拿到北京时间日期
+  const china = new Date(now.getTime() + 8 * 3600 * 1000);
+  return china.toISOString().slice(0, 10);
+}
+
 async function handleTrackEvent(openid, eventName, extra) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = chinaDate();
   await db.collection('analytics').add({
     data: {
       _openid: openid,
