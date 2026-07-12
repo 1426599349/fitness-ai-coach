@@ -1,9 +1,8 @@
 Page({
-  data: { fadeOut: false },
+  data: {},
   _startY: 0,
 
   onLoad() {
-    console.log('===== 新版splash加载成功: 视频背景模式 =====');
     if (wx.getStorageSync('splashShown')) {
       this.enterApp();
     }

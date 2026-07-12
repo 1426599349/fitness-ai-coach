@@ -1,6 +1,7 @@
 <video
-  class="splash-video"
+  class="sv"
   src="/images/splash-video.mp4"
+  poster="/images/splash-poster.jpg"
   autoplay
   loop
   muted
