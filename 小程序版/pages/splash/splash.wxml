@@ -1,40 +1,42 @@
-<view class="splash" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
-  <!-- 全屏视频背景 -->
+<view class="splash">
+  <!-- 全屏视频背景（原生组件，层级最高，触摸事件绑在这里） -->
   <video
     class="splash-video"
-    src="{{videoSrc}}"
-    autoplay
-    loop
-    muted
+    src="/images/splash-video.mp4"
+    autoplay="{{true}}"
+    loop="{{true}}"
+    muted="{{true}}"
     object-fit="cover"
     show-center-play-btn="{{false}}"
     show-play-btn="{{false}}"
     enable-progress-gesture="{{false}}"
     controls="{{false}}"
-  />
+    bindtouchstart="onTouchStart"
+    bindtouchend="onTouchEnd"
+  >
+    <!-- cover-view 覆盖层 — 渲染在原生 video 之上 -->
+    <cover-view class="video-overlay"></cover-view>
 
-  <!-- 半透明遮罩 -->
-  <view class="video-overlay"></view>
+    <!-- 主内容（cover-view 才能显示在 video 之上） -->
+    <cover-view class="main-content {{fadeOut ? 'fade-out' : ''}}">
+      <cover-view class="logo-wrap">
+        <cover-view class="logo-ring"></cover-view>
+        <cover-view class="logo-icon">💪</cover-view>
+      </cover-view>
 
-  <!-- 主内容 -->
-  <view class="main-content {{fadeOut ? 'fade-out' : ''}}">
-    <view class="logo-wrap">
-      <view class="logo-ring"></view>
-      <text class="logo-icon">💪</text>
-    </view>
+      <cover-view class="title-area">
+        <cover-view class="app-name">动作库</cover-view>
+        <cover-view class="divider"></cover-view>
+        <cover-view class="tagline">记录每一次训练 · 见证每一次改变</cover-view>
+      </cover-view>
+    </cover-view>
 
-    <view class="title-area">
-      <text class="app-name">动作库</text>
-      <view class="divider"></view>
-      <text class="tagline">记录每一次训练 · 见证每一次改变</text>
-    </view>
-  </view>
-
-  <!-- 底部上划 -->
-  <view class="swipe-hint {{fadeOut ? 'fade-out' : ''}}">
-    <view class="swipe-circle">
-      <text class="swipe-arrow">↑</text>
-    </view>
-    <text class="swipe-text">上划开启</text>
-  </view>
+    <!-- 底部上划提示 -->
+    <cover-view class="swipe-hint {{fadeOut ? 'fade-out' : ''}}">
+      <cover-view class="swipe-circle">
+        <cover-view class="swipe-arrow">↑</cover-view>
+      </cover-view>
+      <cover-view class="swipe-text">上划开启</cover-view>
+    </cover-view>
+  </video>
 </view>
