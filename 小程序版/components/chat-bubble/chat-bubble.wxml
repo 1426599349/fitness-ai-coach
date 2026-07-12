@@ -4,7 +4,7 @@
 <view class="bubble-container {{message.role}}">
   <!-- AI头像 -->
   <view class="avatar" wx:if="{{message.role === 'ai'}}">
-    <text class="avatar-emoji">🤖</text>
+    <image class="avatar-img" src="/images/ai_avatar.png" mode="aspectFill" />
   </view>
 
   <!-- 消息体 -->

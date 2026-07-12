@@ -22,7 +22,7 @@
   flex-shrink: 0;
   background: var(--color-surface-light);
 }
-.avatar-emoji { font-size: 32rpx; }
+.avatar-img { width: 100%; height: 100%; border-radius: 50%; }
 .avatar-user {
   width: 64rpx; height: 64rpx;
   border-radius: 50%;
